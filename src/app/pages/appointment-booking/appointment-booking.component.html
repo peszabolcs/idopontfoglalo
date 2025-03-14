@@ -1,0 +1,47 @@
+<div class="appointment-booking-container">
+  <h1>Időpontfoglalás</h1>
+  <p>Válassza ki az ügyintézés típusát, helyszínét és időpontját.</p>
+
+  <div class="booking-form">
+    <div class="form-group">
+      <label for="service-type">Ügyintézés típusa</label>
+      <select id="service-type" class="form-control">
+        <option value="">Válasszon ügyintézési típust</option>
+        <option value="szemelyi">Személyi igazolvány</option>
+        <option value="utlevel">Útlevél</option>
+        <option value="jogositvany">Jogosítvány</option>
+        <option value="lakcimkartya">Lakcímkártya</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="location">Okmányiroda helyszíne</label>
+      <select id="location" class="form-control">
+        <option value="">Válasszon helyszínt</option>
+        <option value="budapest-1">Budapest - Központi Okmányiroda</option>
+        <option value="budapest-2">Budapest - Nyugati téri Kormányablak</option>
+        <option value="debrecen">Debrecen - Kormányablak</option>
+        <option value="szeged">Szeged - Kormányablak</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Válasszon dátumot</label>
+      <div class="calendar-placeholder">
+        <!-- Itt lesz a naptár komponens -->
+        <p>Naptár betöltése...</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Válasszon időpontot</label>
+      <div class="time-slots">
+        <!-- Itt lesznek az időpontok -->
+        <p>Időpontok betöltése...</p>
+      </div>
+    </div>
+
+    <button class="btn btn-primary">Időpont foglalása</button>
+  </div>
+</div>
+
