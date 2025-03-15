@@ -5,6 +5,7 @@ import { AppointmentBookingComponent } from './pages/appointment-booking/appoint
 import { MyAppointmentsComponent } from './pages/my-appointments/my-appointments.component';
 import { AdminComponent } from './pages/admin/admin.component';
 import { LoginComponent } from './pages/login/login.component';
+import { RegisterComponent } from './pages/register/register.component';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { AuthGuard } from './guards/auth.guard';
 import { AdminGuard } from './guards/admin.guard';
@@ -23,6 +24,7 @@ export const routes: Routes = [
   },
   { path: 'admin', component: AdminComponent, canActivate: [AdminGuard] },
   { path: 'bejelentkezes', component: LoginComponent },
+  { path: 'regisztracio', component: RegisterComponent },
   { path: '**', component: NotFoundComponent },
 ];
 

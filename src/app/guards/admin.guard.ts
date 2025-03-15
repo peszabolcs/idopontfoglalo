@@ -17,7 +17,7 @@ export class AdminGuard implements CanActivate {
     state: RouterStateSnapshot
   ): boolean {
     // Itt majd a valós admin jogosultság ellenőrzés lesz
-    const isAdmin = true; // Egyelőre mindig false
+    const isAdmin = true; // Egyelőre mindig true
 
     if (!isAdmin) {
       this.router.navigate(['/']);

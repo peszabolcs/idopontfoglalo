@@ -3,11 +3,23 @@
   <p>Itt láthatja az összes aktív és korábbi időpontfoglalását.</p>
 
   <div class="appointments-tabs">
-    <button class="tab-btn active">Aktív foglalások</button>
-    <button class="tab-btn">Korábbi foglalások</button>
+    <button
+      class="tab-btn"
+      [class.active]="!showPastAppointments"
+      (click)="toggleAppointments(false)"
+    >
+      Aktív foglalások
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="showPastAppointments"
+      (click)="toggleAppointments(true)"
+    >
+      Korábbi foglalások
+    </button>
   </div>
 
-  <div class="appointments-list">
+  <div class="appointments-list" *ngIf="!showPastAppointments">
     <div class="appointment-card">
       <div class="appointment-header">
         <h3>Személyi igazolvány ügyintézés</h3>
@@ -40,10 +52,37 @@
       </div>
     </div>
 
-    <div class="no-appointments" style="display: none;">
+    <div class="no-appointments" style="display: none">
       <p>Nincs aktív időpontfoglalása.</p>
-      <a routerLink="/idopontfoglalas" class="btn btn-primary">Új időpont foglalása</a>
+      <a routerLink="/idopontfoglalas" class="btn btn-primary"
+        >Új időpont foglalása</a
+      >
+    </div>
+  </div>
+
+  <div class="appointments-list" *ngIf="showPastAppointments">
+    <div class="appointment-card">
+      <div class="appointment-header">
+        <h3>Személyi igazolvány ügyintézés</h3>
+        <span class="status past">Lezárt</span>
+      </div>
+      <div class="appointment-details">
+        <p><strong>Időpont:</strong> 2023. október 10. 13:45</p>
+        <p><strong>Helyszín:</strong> Budapest - Központi Okmányiroda</p>
+        <p><strong>Ügyintézés típusa:</strong> Személyi igazolvány megújítás</p>
+      </div>
+    </div>
+
+    <div class="appointment-card">
+      <div class="appointment-header">
+        <h3>Lakcímkártya ügyintézés</h3>
+        <span class="status past">Lezárt</span>
+      </div>
+      <div class="appointment-details">
+        <p><strong>Időpont:</strong> 2023. szeptember 5. 09:30</p>
+        <p><strong>Helyszín:</strong> Budapest - Nyugati téri Kormányablak</p>
+        <p><strong>Ügyintézés típusa:</strong> Lakcímváltozás bejelentése</p>
+      </div>
     </div>
   </div>
 </div>
-

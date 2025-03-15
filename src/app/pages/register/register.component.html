@@ -1,0 +1,71 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <h1>Regisztráció</h1>
+      <p>Hozza létre fiókját az időpontfoglaláshoz</p>
+    </div>
+
+    <form class="register-form">
+      <div class="form-group">
+        <label for="name">Teljes név</label>
+        <input
+          type="text"
+          id="name"
+          class="form-control"
+          placeholder="Teljes név"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">E-mail cím</label>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          placeholder="pelda@email.com"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Jelszó</label>
+        <input
+          type="password"
+          id="password"
+          class="form-control"
+          placeholder="Jelszó"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password-confirm">Jelszó megerősítése</label>
+        <input
+          type="password"
+          id="password-confirm"
+          class="form-control"
+          placeholder="Jelszó megerősítése"
+          required
+        />
+      </div>
+
+      <div class="form-check">
+        <input type="checkbox" id="terms" class="form-check-input" required />
+        <label for="terms" class="form-check-label">
+          Elfogadom az <a href="#">Általános Szerződési Feltételeket</a>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">
+        Regisztráció
+      </button>
+
+      <div class="register-footer">
+        <p>
+          Már van fiókja? <a routerLink="/bejelentkezes">Jelentkezzen be</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

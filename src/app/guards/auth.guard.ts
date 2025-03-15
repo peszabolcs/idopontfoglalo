@@ -17,7 +17,7 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): boolean {
     // Itt majd a valós authentikációs logika lesz
-    const isAuthenticated = true; // Egyelőre mindig false
+    const isAuthenticated = true; // Egyelőre mindig true
 
     if (!isAuthenticated) {
       this.router.navigate(['/bejelentkezes'], {
