@@ -2,86 +2,56 @@
   <h1>Admin felület</h1>
   <p>Üdvözöljük az adminisztrációs felületen!</p>
 
-  <div class="admin-dashboard">
-    <div class="dashboard-card">
-      <h3>Foglalások kezelése</h3>
-      <p>Összes foglalás: <strong>124</strong></p>
-      <p>Mai foglalások: <strong>8</strong></p>
-      <button class="btn btn-primary">Foglalások megtekintése</button>
-    </div>
-
-    <div class="dashboard-card">
-      <h3>Felhasználók kezelése</h3>
-      <p>Összes felhasználó: <strong>356</strong></p>
-      <p>Új felhasználók (30 nap): <strong>42</strong></p>
-      <button class="btn btn-primary">Felhasználók megtekintése</button>
-    </div>
-
-    <div class="dashboard-card">
-      <h3>Időpontok kezelése</h3>
-      <p>Elérhető időpontok: <strong>87</strong></p>
-      <p>Foglalt időpontok: <strong>35</strong></p>
-      <button class="btn btn-primary">Időpontok kezelése</button>
-    </div>
-
-    <div class="dashboard-card">
-      <h3>Helyszínek kezelése</h3>
-      <p>Aktív helyszínek: <strong>4</strong></p>
-      <button class="btn btn-primary">Helyszínek kezelése</button>
-    </div>
-  </div>
-
   <div class="admin-section">
     <h2>Legutóbbi foglalások</h2>
     <div class="table-responsive">
       <table class="admin-table">
         <thead>
-        <tr>
-          <th>Név</th>
-          <th>Időpont</th>
-          <th>Helyszín</th>
-          <th>Ügyintézés típusa</th>
-          <th>Állapot</th>
-          <th>Műveletek</th>
-        </tr>
+          <tr>
+            <th>Név</th>
+            <th>Időpont</th>
+            <th>Helyszín</th>
+            <th>Ügyintézés típusa</th>
+            <th>Állapot</th>
+            <th>Műveletek</th>
+          </tr>
         </thead>
         <tbody>
-        <tr>
-          <td>Kovács János</td>
-          <td>2023.11.15 10:30</td>
-          <td>Budapest - Központi</td>
-          <td>Személyi igazolvány</td>
-          <td><span class="status active">Aktív</span></td>
-          <td>
-            <button class="btn btn-sm btn-secondary">Szerkesztés</button>
-            <button class="btn btn-sm btn-danger">Törlés</button>
-          </td>
-        </tr>
-        <tr>
-          <td>Nagy Éva</td>
-          <td>2023.11.16 14:15</td>
-          <td>Debrecen</td>
-          <td>Útlevél</td>
-          <td><span class="status active">Aktív</span></td>
-          <td>
-            <button class="btn btn-sm btn-secondary">Szerkesztés</button>
-            <button class="btn btn-sm btn-danger">Törlés</button>
-          </td>
-        </tr>
-        <tr>
-          <td>Szabó Péter</td>
-          <td>2023.11.14 09:00</td>
-          <td>Szeged</td>
-          <td>Jogosítvány</td>
-          <td><span class="status completed">Teljesítve</span></td>
-          <td>
-            <button class="btn btn-sm btn-secondary">Szerkesztés</button>
-            <button class="btn btn-sm btn-danger">Törlés</button>
-          </td>
-        </tr>
+          <tr>
+            <td>Kovács János</td>
+            <td>2023.11.15 10:30</td>
+            <td>Budapest - Központi</td>
+            <td>Személyi igazolvány</td>
+            <td><span class="status active">Aktív</span></td>
+            <td>
+              <button class="btn btn-sm btn-secondary">Szerkesztés</button>
+              <button class="btn btn-sm btn-danger">Törlés</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Nagy Éva</td>
+            <td>2023.11.16 14:15</td>
+            <td>Debrecen</td>
+            <td>Útlevél</td>
+            <td><span class="status active">Aktív</span></td>
+            <td>
+              <button class="btn btn-sm btn-secondary">Szerkesztés</button>
+              <button class="btn btn-sm btn-danger">Törlés</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Szabó Péter</td>
+            <td>2023.11.14 09:00</td>
+            <td>Szeged</td>
+            <td>Jogosítvány</td>
+            <td><span class="status completed">Teljesítve</span></td>
+            <td>
+              <button class="btn btn-sm btn-secondary">Szerkesztés</button>
+              <button class="btn btn-sm btn-danger">Törlés</button>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
   </div>
 </div>
-
