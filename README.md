@@ -1,59 +1,119 @@
-# Kotprog
+# Időpontfoglaló Rendszer
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.3.
+## Projekt Áttekintés
 
-## Development server
+Ez egy modern webalkalmazás, ami lehetővé teszi a felhasználóknak, hogy időpontokat foglaljanak online. Az alkalmazás Angular keretrendszeren alapul, ami egy modern, TypeScript-alapú webes fejlesztői platform.
 
-To start a local development server, run:
+## Technológiai Stack
+
+- **Angular**: A fő keretrendszer, ami segít a webalkalmazás struktúrájának és működésének kezelésében
+- **TypeScript**: A JavaScript egy típusozott verziója, ami segít a kód minőségének és megbízhatóságának növelésében
+- **SCSS**: A CSS egy bővített verziója, ami lehetővé teszi a stílusok hatékonyabb kezelését
+- **Angular Router**: Az oldalak közötti navigáció kezelésére
+- **Angular Guards**: A biztonságos hozzáférés kezelésére
+
+## Projekt Struktúra
+
+A projekt a következő főbb részekből áll:
+
+### 1. Komponensek (`src/app/components/`)
+
+- **Header**: Az oldal tetején megjelenő navigációs sáv
+- **Footer**: Az oldal alján megjelenő lábléc
+
+### 2. Oldalak (`src/app/pages/`)
+
+- **Home**: A főoldal
+- **Login**: Bejelentkezési oldal
+- **Register**: Regisztrációs oldal
+- **Appointment-booking**: Időpontfoglalási oldal
+- **My-appointments**: A felhasználó foglalásainak listázása
+- **Admin**: Adminisztrációs felület
+- **Not-found**: 404-es hibaoldal
+
+### 3. Védelmek (`src/app/guards/`)
+
+- **Auth Guard**: Ellenőrzi, hogy a felhasználó be van-e jelentkezve
+- **Admin Guard**: Ellenőrzi, hogy a felhasználónak van-e admin jogosultsága
+
+## Hogyan Működik?
+
+### 1. Routing (Útvonalak)
+
+- Az alkalmazás különböző oldalai között a routing segítségével navigálunk
+- Például: `/login` azonosítja a bejelentkezési oldalt
+- A védelmek (guards) biztosítják, hogy csak jogosult felhasználók érhetik el bizonyos oldalakat
+
+### 2. Komponensek
+
+- Minden komponens egy különálló, újrafelhasználható egység
+- Például a header komponens minden oldalon megjelenik
+- A komponensek saját HTML, SCSS és TypeScript fájlokkal rendelkeznek
+
+### 3. Stílusok
+
+- Az SCSS segítségével modern, reszponzív dizájn
+- A stílusok modulárisan vannak szervezve, minden komponens saját stílusokkal rendelkezik
+
+### 4. Biztonság
+
+- A guards védelmet nyújtanak az oldalakhoz
+- Csak bejelentkezett felhasználók foglalhatnak időpontot
+- Csak admin felhasználók érhetik el az admin felületet
+
+## Hogyan Indítható El?
+
+1. Telepítse a függőségeket:
+
+```bash
+npm install
+```
+
+2. Indítsa el a fejlesztői szervert:
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+3. Nyissa meg a böngészőben: `http://localhost:4200`
 
-## Code scaffolding
+## Gyakori Kérdések
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Mi az Angular?
 
-```bash
-ng generate component component-name
-```
+Angular egy modern webes fejlesztői keretrendszer, ami segít a webalkalmazások létrehozásában. A főbb előnyei:
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- Komponens alapú fejlesztés
+- Típusbiztos kód (TypeScript)
+- Hatékony routing rendszer
+- Moduláris felépítés
 
-```bash
-ng generate --help
-```
+### Miért TypeScript?
 
-## Building
+TypeScript a JavaScript egy típusozott verziója, ami:
 
-To build the project run:
+- Kevesebb hibát eredményez
+- Jobb kód minőséget biztosít
+- Könnyebb kód karbantarthatóságot tesz lehetővé
 
-```bash
-ng build
-```
+### Mi az SCSS?
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+SCSS a CSS egy bővített verziója, ami:
 
-## Running unit tests
+- Változók használatát teszi lehetővé
+- Beágyazott szabályokat támogat
+- Könnyebb stílusok kezelését teszi lehetővé
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### Mi a Guard?
 
-```bash
-ng test
-```
+A Guards olyan biztonsági mechanizmusok, amelyek:
 
-## Running end-to-end tests
+- Ellenőrzik a felhasználó jogosultságait
+- Védelmet nyújtanak az oldalakhoz
+- Biztosítják a biztonságos hozzáférést
 
-For end-to-end (e2e) testing, run:
+## Fejlesztői Környezet
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Node.js és npm szükséges
+- Angular CLI a fejlesztéshez
+- Git a verziókezeléshez
