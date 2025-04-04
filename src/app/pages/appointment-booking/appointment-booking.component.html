@@ -1,47 +1,118 @@
-<div class="appointment-booking-container">
-  <h1>Időpontfoglalás</h1>
-  <p>Válassza ki az ügyintézés típusát, helyszínét és időpontját.</p>
+<div class="appointment-container">
+  <h2>Időpontfoglalás</h2>
 
-  <div class="booking-form">
+  <form
+    [formGroup]="appointmentForm"
+    (ngSubmit)="onSubmit()"
+    class="appointment-form"
+  >
     <div class="form-group">
-      <label for="service-type">Ügyintézés típusa</label>
-      <select id="service-type" class="form-control">
+      <label for="name">Név</label>
+      <input
+        type="text"
+        id="name"
+        formControlName="name"
+        placeholder="Teljes név"
+      />
+      <div
+        class="error-message"
+        *ngIf="
+          appointmentForm.get('name')?.invalid &&
+          appointmentForm.get('name')?.touched
+        "
+      >
+        A név megadása kötelező és legalább 2 karakter hosszú
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email cím</label>
+      <input
+        type="email"
+        id="email"
+        formControlName="email"
+        placeholder="pelda@email.com"
+      />
+      <div
+        class="error-message"
+        *ngIf="
+          appointmentForm.get('email')?.invalid &&
+          appointmentForm.get('email')?.touched
+        "
+      >
+        Kérjük, adjon meg egy érvényes email címet
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="date">Dátum</label>
+      <input type="date" id="date" formControlName="date" />
+      <div
+        class="error-message"
+        *ngIf="
+          appointmentForm.get('date')?.invalid &&
+          appointmentForm.get('date')?.touched
+        "
+      >
+        A dátum megadása kötelező
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="time">Időpont</label>
+      <input type="time" id="time" formControlName="time" />
+      <div
+        class="error-message"
+        *ngIf="
+          appointmentForm.get('time')?.invalid &&
+          appointmentForm.get('time')?.touched
+        "
+      >
+        Az időpont megadása kötelező
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="service">Ügyintézési típus</label>
+      <select id="service" formControlName="service">
         <option value="">Válasszon ügyintézési típust</option>
         <option value="szemelyi">Személyi igazolvány</option>
         <option value="utlevel">Útlevél</option>
-        <option value="jogositvany">Jogosítvány</option>
+        <option value="jogositvany">Jogositvány</option>
         <option value="lakcimkartya">Lakcímkártya</option>
+        <option value="other">Egyéb</option>
       </select>
-    </div>
-
-    <div class="form-group">
-      <label for="location">Okmányiroda helyszíne</label>
-      <select id="location" class="form-control">
-        <option value="">Válasszon helyszínt</option>
-        <option value="budapest-1">Budapest - Központi Okmányiroda</option>
-        <option value="budapest-2">Budapest - Nyugati téri Kormányablak</option>
-        <option value="debrecen">Debrecen - Kormányablak</option>
-        <option value="szeged">Szeged - Kormányablak</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Válasszon dátumot</label>
-      <div class="calendar-placeholder">
-        <!-- Itt lesz a naptár komponens -->
-        <p>Naptár betöltése...</p>
+      <div
+        class="error-message"
+        *ngIf="
+          appointmentForm.get('service')?.invalid &&
+          appointmentForm.get('service')?.touched
+        "
+      >
+        A szolgáltatás kiválasztása kötelező
       </div>
     </div>
 
     <div class="form-group">
-      <label>Válasszon időpontot</label>
-      <div class="time-slots">
-        <!-- Itt lesznek az időpontok -->
-        <p>Időpontok betöltése...</p>
+      <label for="notes">Megjegyzés</label>
+      <textarea
+        id="notes"
+        formControlName="notes"
+        placeholder="További megjegyzések..."
+      ></textarea>
+    </div>
+
+    <div class="messages">
+      <div class="success-message" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
       </div>
     </div>
 
-    <button class="btn btn-primary">Időpont foglalása</button>
-  </div>
+    <button type="submit" [disabled]="appointmentForm.invalid">
+      Időpont foglalása
+    </button>
+  </form>
 </div>
-
