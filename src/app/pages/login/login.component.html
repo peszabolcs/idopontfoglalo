@@ -1,53 +1,84 @@
-<mat-card class="login-container">
-  <mat-card-header>
-    <mat-card-title>Bejelentkezés</mat-card-title>
-  </mat-card-header>
-
-  <mat-card-content>
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Email cím</mat-label>
-        <input
-          matInput
-          type="email"
-          formControlName="email"
-          placeholder="pelda@email.com"
-        />
-        <mat-error
-          *ngIf="
-            loginForm.get('email')?.invalid && loginForm.get('email')?.touched
-          "
-        >
-          Kérjük, adjon meg egy érvényes email címet
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Jelszó</mat-label>
-        <input
-          matInput
-          type="password"
-          formControlName="password"
-          placeholder="Jelszó"
-        />
-        <mat-error
-          *ngIf="
-            loginForm.get('password')?.invalid &&
-            loginForm.get('password')?.touched
-          "
-        >
-          A jelszó legalább 6 karakter hosszú kell legyen
-        </mat-error>
-      </mat-form-field>
-
-      <button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        [disabled]="loginForm.invalid"
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>Bejelentkezés</mat-card-title>
+      <mat-card-subtitle
+        >Jelentkezzen be a fiókjába az időpontfoglaláshoz</mat-card-subtitle
       >
-        Bejelentkezés
-      </button>
-    </form>
-  </mat-card-content>
-</mat-card>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Email cím</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            placeholder="pelda@email.com"
+          />
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error
+            *ngIf="
+              loginForm.get('email')?.invalid && loginForm.get('email')?.touched
+            "
+          >
+            Kérjük, adjon meg egy érvényes email címet
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Jelszó</mat-label>
+          <input
+            matInput
+            type="password"
+            formControlName="password"
+            placeholder="Jelszó"
+          />
+          <mat-icon matPrefix>lock</mat-icon>
+          <mat-error
+            *ngIf="
+              loginForm.get('password')?.invalid &&
+              loginForm.get('password')?.touched
+            "
+          >
+            A jelszó legalább 6 karakter hosszú kell legyen
+          </mat-error>
+        </mat-form-field>
+
+        <div class="form-options">
+          <mat-checkbox>Emlékezz rám</mat-checkbox>
+          <a href="#" class="forgot-password">
+            <mat-icon>help</mat-icon>
+            Elfelejtett jelszó?
+          </a>
+        </div>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="loginForm.invalid"
+          class="submit-button"
+        >
+          <mat-icon>login</mat-icon>
+          Bejelentkezés
+        </button>
+
+        <div class="auth-divider">
+          <mat-divider></mat-divider>
+          <span>vagy</span>
+          <mat-divider></mat-divider>
+        </div>
+
+        <div class="auth-footer">
+          <p>Még nincs fiókja?</p>
+          <a mat-raised-button color="accent" routerLink="/regisztracio">
+            <mat-icon>person_add</mat-icon>
+            Regisztráció
+          </a>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

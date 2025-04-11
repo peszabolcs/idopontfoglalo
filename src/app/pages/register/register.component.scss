@@ -1,36 +1,87 @@
+// Variables
+$primary-color: #4a6bff;
+$secondary-color: #ff6b6b;
+$text-color: #2c3e50;
+$light-gray: #f5f5f5;
+$border-color: #e0e8ff;
+$shadow-color: rgba(0, 0, 0, 0.08);
+
+// Mixins
+@mixin card-shadow {
+  box-shadow: 0 10px 30px $shadow-color;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+@mixin hover-effect {
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  }
+}
+
+@mixin gradient-button($start-color, $end-color) {
+  background: linear-gradient(45deg, $start-color, $end-color);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(
+      45deg,
+      darken($start-color, 10%),
+      darken($end-color, 10%)
+    );
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba($start-color, 0.3);
+  }
+}
+
 .register-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 200px);
   padding: 2rem 1rem;
+  background: #ffffff;
 
   .register-card {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    border: 1px solid $border-color;
+    border-radius: 16px;
+    @include card-shadow;
     width: 100%;
-    max-width: 400px;
+    max-width: 450px;
     overflow: hidden;
 
+    @include hover-effect;
+
     .register-header {
-      padding: 2rem;
+      padding: 2.5rem;
       text-align: center;
-      background-color: #f5f5f5;
+      background-color: $light-gray;
+      border-bottom: 1px solid $border-color;
 
       h1 {
         margin-bottom: 0.5rem;
-        color: #333;
+        color: $text-color;
+        font-size: 2.2rem;
+        font-weight: 700;
+        background: linear-gradient(
+          45deg,
+          $primary-color,
+          lighten($primary-color, 20%)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
       }
 
       p {
         color: #666;
         margin-bottom: 0;
+        font-size: 1.1rem;
       }
     }
 
     .register-form {
-      padding: 2rem;
+      padding: 2.5rem;
 
       .form-group {
         margin-bottom: 1.5rem;
@@ -38,21 +89,23 @@
         label {
           display: block;
           margin-bottom: 0.5rem;
-          font-weight: 500;
-          color: #333;
+          font-weight: 600;
+          color: $text-color;
         }
 
         .form-control {
           width: 100%;
           padding: 0.75rem;
-          border: 1px solid #ddd;
-          border-radius: 4px;
+          border: 2px solid $border-color;
+          border-radius: 8px;
           font-size: 1rem;
-          transition: border-color 0.3s ease;
+          transition: all 0.3s ease;
+          background: rgba(255, 255, 255, 0.9);
 
           &:focus {
-            border-color: #3f51b5;
+            border-color: $primary-color;
             outline: none;
+            box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
           }
         }
       }
@@ -68,10 +121,12 @@
           color: #666;
 
           a {
-            color: #3f51b5;
+            color: $primary-color;
             text-decoration: none;
+            transition: all 0.3s ease;
 
             &:hover {
+              color: darken($primary-color, 10%);
               text-decoration: underline;
             }
           }
@@ -81,7 +136,12 @@
       .btn-block {
         width: 100%;
         padding: 0.75rem;
-        font-size: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: none;
+        color: white;
+        @include gradient-button($primary-color, lighten($primary-color, 20%));
       }
 
       .register-footer {
@@ -90,10 +150,12 @@
         color: #666;
 
         a {
-          color: #3f51b5;
+          color: $primary-color;
           text-decoration: none;
+          transition: all 0.3s ease;
 
           &:hover {
+            color: darken($primary-color, 10%);
             text-decoration: underline;
           }
         }
@@ -108,11 +170,15 @@
 
     .register-card {
       .register-header {
-        padding: 1.5rem;
+        padding: 2rem;
+
+        h1 {
+          font-size: 2rem;
+        }
       }
 
       .register-form {
-        padding: 1.5rem;
+        padding: 2rem;
       }
     }
   }

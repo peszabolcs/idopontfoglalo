@@ -1,165 +1,212 @@
-.login-container {
+// Variables
+$primary-color: #4a6bff;
+$secondary-color: #ff6b6b;
+$text-color: #2c3e50;
+$light-gray: #f5f5f5;
+$border-color: #e0e8ff;
+$shadow-color: rgba(0, 0, 0, 0.08);
+
+// Mixins
+@mixin card-shadow {
+  box-shadow: 0 10px 30px $shadow-color;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+@mixin hover-effect {
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  }
+}
+
+@mixin gradient-button($start-color, $end-color) {
+  background: linear-gradient(45deg, $start-color, $end-color);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(
+      45deg,
+      darken($start-color, 10%),
+      darken($end-color, 10%)
+    );
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba($start-color, 0.3);
+  }
+}
+
+.auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 200px);
   padding: 2rem 1rem;
-  max-width: 400px;
-  margin: 2rem auto;
-
-  .login-card {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    overflow: hidden;
-
-    .login-header {
-      padding: 2rem;
-      text-align: center;
-      background-color: #f5f5f5;
-
-      h1 {
-        margin-bottom: 0.5rem;
-        color: #333;
-      }
-
-      p {
-        color: #666;
-        margin-bottom: 0;
-      }
-    }
-
-    .login-tabs {
-      display: flex;
-      border-bottom: 1px solid #ddd;
-
-      .tab-btn {
-        flex: 1;
-        padding: 1rem;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1rem;
-        color: #666;
-        text-align: center;
-        transition: all 0.3s ease;
-
-        &.active {
-          color: #3f51b5;
-          font-weight: 500;
-          box-shadow: inset 0 -2px 0 #3f51b5;
-        }
-
-        &:hover {
-          color: #3f51b5;
-        }
-      }
-    }
-
-    .login-form {
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-
-      .form-group {
-        margin-bottom: 1.5rem;
-
-        label {
-          display: block;
-          margin-bottom: 0.5rem;
-          font-weight: 500;
-          color: #333;
-        }
-
-        .form-control {
-          width: 100%;
-          padding: 0.75rem;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          font-size: 1rem;
-          transition: border-color 0.3s ease;
-
-          &:focus {
-            border-color: #3f51b5;
-            outline: none;
-          }
-        }
-      }
-
-      .form-check {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1.5rem;
-
-        .form-check-input {
-          margin-right: 0.5rem;
-        }
-
-        .form-check-label {
-          color: #666;
-        }
-      }
-
-      .btn-block {
-        width: 100%;
-        padding: 0.75rem;
-        font-size: 1rem;
-      }
-
-      .login-footer {
-        margin-top: 1.5rem;
-        text-align: center;
-
-        .forgot-password {
-          color: #3f51b5;
-          text-decoration: none;
-
-          &:hover {
-            text-decoration: underline;
-          }
-        }
-      }
-    }
-  }
+  background: #ffffff;
 }
 
-@media (max-width: 768px) {
-  .login-container {
-    padding: 1rem;
+.auth-card {
+  width: 100%;
+  max-width: 450px;
+  @include card-shadow;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid $border-color;
 
-    .login-card {
-      .login-header {
-        padding: 1.5rem;
-      }
+  @include hover-effect;
+}
 
-      .login-form {
-        padding: 1.5rem;
-      }
-    }
-  }
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2.5rem;
 }
 
 .form-field {
   width: 100%;
+
+  mat-icon {
+    color: $primary-color;
+    margin-right: 8px;
+  }
+
+  input {
+    font-size: 1rem;
+    padding: 12px 0;
+    color: $text-color;
+  }
 }
 
-mat-card {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5rem 0;
+
+  .forgot-password {
+    color: $primary-color;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: darken($primary-color, 10%);
+      text-decoration: underline;
+    }
+  }
+
+  mat-checkbox {
+    color: #666;
+  }
+}
+
+.submit-button {
+  margin-top: 1.5rem;
+  width: 100%;
+  height: 48px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  @include gradient-button($primary-color, lighten($primary-color, 20%));
+
+  &:disabled {
+    background: #e0e0e0;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: #666;
+
+  mat-divider {
+    flex: 1;
+    border-top-color: $border-color;
+  }
+
+  span {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: $primary-color;
+  }
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+
+  p {
+    margin-bottom: 1rem;
+    color: #666;
+    font-size: 0.95rem;
+  }
+
+  a {
+    width: 100%;
+    height: 48px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    @include gradient-button($secondary-color, lighten($secondary-color, 20%));
+  }
 }
 
 mat-card-header {
-  margin-bottom: 1rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding: 2.5rem 2.5rem 0;
+  background-color: $light-gray;
+  border-bottom: 1px solid $border-color;
+
+  mat-card-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(
+      45deg,
+      $primary-color,
+      lighten($primary-color, 20%)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  mat-card-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
 }
 
-mat-card-title {
-  font-size: 1.5rem;
-  font-weight: 500;
-}
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 1rem;
+  }
 
-button[type="submit"] {
-  margin-top: 1rem;
-  width: 100%;
+  .auth-card {
+    max-width: 100%;
+  }
+
+  mat-card-header {
+    padding: 2rem 2rem 0;
+
+    mat-card-title {
+      font-size: 2rem;
+    }
+  }
+
+  .auth-form {
+    padding: 2rem;
+  }
 }
