@@ -20,7 +20,7 @@
       <mat-card-content>
         <div class="appointment-details">
           <p>
-            <strong>Időpont:</strong> {{ appointment.date }}
+            <strong>Időpont:</strong> {{ appointment.date | dateFormat }}
             {{ appointment.time }}
           </p>
           <p><strong>Helyszín:</strong> {{ appointment.locationId }}</p>
