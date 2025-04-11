@@ -1,42 +1,72 @@
 <div class="appointments-list">
   <div *ngFor="let appointment of appointments" class="appointment-card">
-    <div class="appointment-header">
-      <h3>{{ appointment.serviceId }}</h3>
-      <span
-        class="status"
-        [class.active]="!showPastAppointments"
-        [class.past]="showPastAppointments"
-      >
-        {{ showPastAppointments ? "Lezárt" : "Aktív" }}
-      </span>
-    </div>
-    <div class="appointment-details">
-      <p>
-        <strong>Időpont:</strong> {{ appointment.date }} {{ appointment.time }}
-      </p>
-      <p><strong>Helyszín:</strong> {{ appointment.locationId }}</p>
-      <p><strong>Megjegyzés:</strong> {{ appointment.notes }}</p>
-    </div>
-    <div class="appointment-actions" *ngIf="!showPastAppointments">
-      <button class="btn btn-secondary" (click)="onModify(appointment.id)">
-        Módosítás
-      </button>
-      <button class="btn btn-danger" (click)="onCancel(appointment.id)">
-        Lemondás
-      </button>
-    </div>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ appointment.serviceId }}</mat-card-title>
+        <mat-card-subtitle>
+          <mat-chip-set>
+            <mat-chip
+              [color]="showPastAppointments ? 'warn' : 'primary'"
+              selected
+            >
+              {{ showPastAppointments ? "Lezárt" : "Aktív" }}
+            </mat-chip>
+          </mat-chip-set>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-divider></mat-divider>
+
+      <mat-card-content>
+        <div class="appointment-details">
+          <p>
+            <strong>Időpont:</strong> {{ appointment.date }}
+            {{ appointment.time }}
+          </p>
+          <p><strong>Helyszín:</strong> {{ appointment.locationId }}</p>
+          <p><strong>Megjegyzés:</strong> {{ appointment.notes }}</p>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions *ngIf="!showPastAppointments" align="end">
+        <button
+          mat-button
+          color="primary"
+          (click)="onModify(appointment.id)"
+          matTooltip="Időpont módosítása"
+        >
+          <mat-icon>edit</mat-icon>
+          Módosítás
+        </button>
+        <button
+          mat-button
+          color="warn"
+          (click)="onCancel(appointment.id)"
+          matTooltip="Időpont lemondása"
+        >
+          <mat-icon>cancel</mat-icon>
+          Lemondás
+        </button>
+      </mat-card-actions>
+    </mat-card>
   </div>
 
   <div class="no-appointments" *ngIf="appointments.length === 0">
-    <p>
-      Nincs {{ showPastAppointments ? "korábbi" : "aktív" }} időpontfoglalása.
-    </p>
-    <a
-      routerLink="/idopontfoglalas"
-      class="btn btn-primary"
-      *ngIf="!showPastAppointments"
-    >
-      Új időpont foglalása
-    </a>
+    <mat-card>
+      <mat-card-content>
+        <p>
+          Nincs
+          {{ showPastAppointments ? "korábbi" : "aktív" }} időpontfoglalása.
+        </p>
+        <a
+          routerLink="/idopontfoglalas"
+          mat-raised-button
+          color="primary"
+          *ngIf="!showPastAppointments"
+        >
+          Új időpont foglalása
+        </a>
+      </mat-card-content>
+    </mat-card>
   </div>
 </div>
