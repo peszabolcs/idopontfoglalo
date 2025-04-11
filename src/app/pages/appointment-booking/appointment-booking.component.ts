@@ -65,9 +65,15 @@ export class AppointmentBookingComponent {
   async onSubmit() {
     if (this.appointmentForm.valid) {
       try {
-        await this.appointmentService.createAppointment(
-          this.appointmentForm.value
-        );
+        const formValue = this.appointmentForm.value;
+        const date = new Date(formValue.date);
+        const formattedDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+
+        await this.appointmentService.createAppointment({
+          ...formValue,
+          date: formattedDate,
+        });
+
         this.snackBar.open('Időpont sikeresen foglalva!', 'Bezár', {
           duration: 3000,
           horizontalPosition: 'center',
