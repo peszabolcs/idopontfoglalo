@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // Variables
 $primary-color: #4a6bff;
 $secondary-color: #ff6b6b;
@@ -26,8 +28,8 @@ $shadow-color: rgba(0, 0, 0, 0.08);
   &:hover {
     background: linear-gradient(
       45deg,
-      darken($start-color, 10%),
-      darken($end-color, 10%)
+      color.adjust($start-color, $lightness: -10%),
+      color.adjust($end-color, $lightness: -10%)
     );
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba($start-color, 0.3);
@@ -67,7 +69,7 @@ $shadow-color: rgba(0, 0, 0, 0.08);
         background: linear-gradient(
           45deg,
           $primary-color,
-          lighten($primary-color, 20%)
+          color.adjust($primary-color, $lightness: 20%)
         );
         background-clip: text;
         -webkit-background-clip: text;
@@ -127,7 +129,7 @@ $shadow-color: rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
 
             &:hover {
-              color: darken($primary-color, 10%);
+              color: color.adjust($primary-color, $lightness: -10%);
               text-decoration: underline;
             }
           }
@@ -142,7 +144,10 @@ $shadow-color: rgba(0, 0, 0, 0.08);
         border-radius: 8px;
         border: none;
         color: white;
-        @include gradient-button($primary-color, lighten($primary-color, 20%));
+        @include gradient-button(
+          $primary-color,
+          color.adjust($primary-color, $lightness: 20%)
+        );
       }
 
       .register-footer {
@@ -156,7 +161,7 @@ $shadow-color: rgba(0, 0, 0, 0.08);
           transition: all 0.3s ease;
 
           &:hover {
-            color: darken($primary-color, 10%);
+            color: color.adjust($primary-color, $lightness: -10%);
             text-decoration: underline;
           }
         }
