@@ -1,0 +1,42 @@
+<div class="appointments-list">
+  <div *ngFor="let appointment of appointments" class="appointment-card">
+    <div class="appointment-header">
+      <h3>{{ appointment.serviceId }}</h3>
+      <span
+        class="status"
+        [class.active]="!showPastAppointments"
+        [class.past]="showPastAppointments"
+      >
+        {{ showPastAppointments ? "Lezárt" : "Aktív" }}
+      </span>
+    </div>
+    <div class="appointment-details">
+      <p>
+        <strong>Időpont:</strong> {{ appointment.date }} {{ appointment.time }}
+      </p>
+      <p><strong>Helyszín:</strong> {{ appointment.locationId }}</p>
+      <p><strong>Megjegyzés:</strong> {{ appointment.notes }}</p>
+    </div>
+    <div class="appointment-actions" *ngIf="!showPastAppointments">
+      <button class="btn btn-secondary" (click)="onModify(appointment.id)">
+        Módosítás
+      </button>
+      <button class="btn btn-danger" (click)="onCancel(appointment.id)">
+        Lemondás
+      </button>
+    </div>
+  </div>
+
+  <div class="no-appointments" *ngIf="appointments.length === 0">
+    <p>
+      Nincs {{ showPastAppointments ? "korábbi" : "aktív" }} időpontfoglalása.
+    </p>
+    <a
+      routerLink="/idopontfoglalas"
+      class="btn btn-primary"
+      *ngIf="!showPastAppointments"
+    >
+      Új időpont foglalása
+    </a>
+  </div>
+</div>

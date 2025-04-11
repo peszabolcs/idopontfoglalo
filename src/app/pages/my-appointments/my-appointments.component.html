@@ -19,70 +19,10 @@
     </button>
   </div>
 
-  <div class="appointments-list" *ngIf="!showPastAppointments">
-    <div class="appointment-card">
-      <div class="appointment-header">
-        <h3>Személyi igazolvány ügyintézés</h3>
-        <span class="status active">Aktív</span>
-      </div>
-      <div class="appointment-details">
-        <p><strong>Időpont:</strong> 2023. november 15. 10:30</p>
-        <p><strong>Helyszín:</strong> Budapest - Központi Okmányiroda</p>
-        <p><strong>Ügyintézés típusa:</strong> Személyi igazolvány igénylés</p>
-      </div>
-      <div class="appointment-actions">
-        <button class="btn btn-secondary">Módosítás</button>
-        <button class="btn btn-danger">Lemondás</button>
-      </div>
-    </div>
-
-    <div class="appointment-card">
-      <div class="appointment-header">
-        <h3>Útlevél ügyintézés</h3>
-        <span class="status active">Aktív</span>
-      </div>
-      <div class="appointment-details">
-        <p><strong>Időpont:</strong> 2023. december 5. 14:15</p>
-        <p><strong>Helyszín:</strong> Budapest - Nyugati téri Kormányablak</p>
-        <p><strong>Ügyintézés típusa:</strong> Útlevél igénylés</p>
-      </div>
-      <div class="appointment-actions">
-        <button class="btn btn-secondary">Módosítás</button>
-        <button class="btn btn-danger">Lemondás</button>
-      </div>
-    </div>
-
-    <div class="no-appointments" style="display: none">
-      <p>Nincs aktív időpontfoglalása.</p>
-      <a routerLink="/idopontfoglalas" class="btn btn-primary"
-        >Új időpont foglalása</a
-      >
-    </div>
-  </div>
-
-  <div class="appointments-list" *ngIf="showPastAppointments">
-    <div class="appointment-card">
-      <div class="appointment-header">
-        <h3>Személyi igazolvány ügyintézés</h3>
-        <span class="status past">Lezárt</span>
-      </div>
-      <div class="appointment-details">
-        <p><strong>Időpont:</strong> 2023. október 10. 13:45</p>
-        <p><strong>Helyszín:</strong> Budapest - Központi Okmányiroda</p>
-        <p><strong>Ügyintézés típusa:</strong> Személyi igazolvány megújítás</p>
-      </div>
-    </div>
-
-    <div class="appointment-card">
-      <div class="appointment-header">
-        <h3>Lakcímkártya ügyintézés</h3>
-        <span class="status past">Lezárt</span>
-      </div>
-      <div class="appointment-details">
-        <p><strong>Időpont:</strong> 2023. szeptember 5. 09:30</p>
-        <p><strong>Helyszín:</strong> Budapest - Nyugati téri Kormányablak</p>
-        <p><strong>Ügyintézés típusa:</strong> Lakcímváltozás bejelentése</p>
-      </div>
-    </div>
-  </div>
+  <app-appointment-list
+    [appointments]="appointments"
+    [showPastAppointments]="showPastAppointments"
+    (appointmentModified)="onAppointmentModified($event)"
+    (appointmentCancelled)="onAppointmentCancelled($event)"
+  ></app-appointment-list>
 </div>
