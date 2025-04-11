@@ -1,0 +1,42 @@
+<div class="test-container">
+  <h1>Szolgáltatások tesztelése</h1>
+
+  <div class="data-section">
+    <h2>Felhasználók</h2>
+    <div *ngFor="let user of users" class="data-item">
+      <p><strong>Név:</strong> {{ user.name }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Admin:</strong> {{ user.isAdmin ? "Igen" : "Nem" }}</p>
+    </div>
+  </div>
+
+  <div class="data-section">
+    <h2>Szolgáltatások</h2>
+    <div *ngFor="let service of services" class="data-item">
+      <p><strong>Név:</strong> {{ service.name }}</p>
+      <p><strong>Leírás:</strong> {{ service.description }}</p>
+      <p><strong>Időtartam:</strong> {{ service.duration }} perc</p>
+      <p><strong>Ár:</strong> {{ service.price }} Ft</p>
+    </div>
+  </div>
+
+  <div class="data-section">
+    <h2>Helyszínek</h2>
+    <div *ngFor="let location of locations" class="data-item">
+      <p><strong>Név:</strong> {{ location.name }}</p>
+      <p><strong>Cím:</strong> {{ location.address }}</p>
+      <p><strong>Város:</strong> {{ location.city }}</p>
+      <p><strong>Irsz.:</strong> {{ location.postalCode }}</p>
+    </div>
+  </div>
+
+  <div class="data-section">
+    <h2>Időpontok</h2>
+    <div *ngFor="let appointment of appointments" class="data-item">
+      <p><strong>Dátum:</strong> {{ appointment.date }}</p>
+      <p><strong>Idő:</strong> {{ appointment.time }}</p>
+      <p><strong>Státusz:</strong> {{ appointment.status }}</p>
+      <p><strong>Megjegyzés:</strong> {{ appointment.notes }}</p>
+    </div>
+  </div>
+</div>

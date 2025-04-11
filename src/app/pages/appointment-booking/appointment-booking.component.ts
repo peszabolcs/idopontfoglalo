@@ -6,7 +6,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { AppointmentService } from '../../services/appointment.service';
-import { Appointment } from '../../services/appointment.service';
+import { Appointment } from '../../models';
 import { CommonModule } from '@angular/common';
 
 @Component({

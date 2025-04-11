@@ -1,16 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IndexedDBService } from './indexed-db.service';
-
-export interface Appointment {
-  id?: number;
-  name: string;
-  email: string;
-  date: string;
-  time: string;
-  service: string;
-  notes?: string;
-  createdAt: Date;
-}
+import { Appointment } from '../models';
 
 @Injectable({
   providedIn: 'root',
@@ -19,11 +9,13 @@ export class AppointmentService {
   constructor(private indexedDB: IndexedDBService) {}
 
   async createAppointment(
-    appointment: Omit<Appointment, 'id' | 'createdAt'>
+    appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt' | 'status'>
   ): Promise<number> {
     const newAppointment: Appointment = {
       ...appointment,
+      status: 'pending',
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
     return this.indexedDB.addAppointment(newAppointment);
   }
