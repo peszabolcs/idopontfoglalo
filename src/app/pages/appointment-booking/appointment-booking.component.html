@@ -1,4 +1,4 @@
-<mat-card class="appointment-container">
+<mat-card class="appointment-container" appHighlight="#f9f9f9">
   <mat-card-header>
     <mat-card-title>Időpontfoglalás</mat-card-title>
   </mat-card-header>
@@ -18,7 +18,7 @@
           <div class="step-content">
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Ügyintézési típus</mat-label>
-              <mat-select formControlName="service">
+              <mat-select formControlName="service" [appFocus]="true">
                 <mat-option
                   *ngFor="let service of services"
                   [value]="service.value"
@@ -40,6 +40,9 @@
                 mat-button
                 matStepperNext
                 [disabled]="serviceFormGroup.invalid"
+                [ngStyle]="{
+                  'background-color': serviceFormGroup.valid ? '#e0f2f1' : ''
+                }"
               >
                 Tovább
               </button>
@@ -54,7 +57,7 @@
           <div class="step-content">
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Helyszín</mat-label>
-              <mat-select formControlName="locationId">
+              <mat-select formControlName="locationId" [appFocus]="true">
                 <mat-option
                   *ngFor="let location of locations"
                   [value]="location.id"
@@ -77,6 +80,9 @@
                 mat-button
                 matStepperNext
                 [disabled]="locationFormGroup.invalid"
+                [ngStyle]="{
+                  'background-color': locationFormGroup.valid ? '#e0f2f1' : ''
+                }"
               >
                 Tovább
               </button>
@@ -97,6 +103,7 @@
                   [matDatepicker]="picker"
                   formControlName="date"
                   [min]="minDate"
+                  [appFocus]="true"
                 />
                 <mat-datepicker-toggle
                   matIconSuffix
@@ -115,7 +122,10 @@
 
               <mat-form-field appearance="outline" class="form-field">
                 <mat-label>Időpont</mat-label>
-                <mat-select formControlName="time">
+                <mat-select
+                  formControlName="time"
+                  [appTimeValidator]="{ start: '08:00', end: '17:00' }"
+                >
                   <mat-option
                     *ngFor="let time of availableTimes"
                     [value]="time"
@@ -126,10 +136,18 @@
                 <mat-error
                   *ngIf="
                     dateTimeFormGroup.get('time')?.invalid &&
-                    dateTimeFormGroup.get('time')?.touched
+                    dateTimeFormGroup.get('time')?.touched &&
+                    !dateTimeFormGroup.get('time')?.errors?.['outsideWorkHours']
                   "
                 >
                   Az időpont kiválasztása kötelező
+                </mat-error>
+                <mat-error
+                  *ngIf="
+                    dateTimeFormGroup.get('time')?.errors?.['outsideWorkHours']
+                  "
+                >
+                  Az időpont munkaidőn kívül esik (8:00-17:00)
                 </mat-error>
               </mat-form-field>
             </div>
@@ -139,6 +157,9 @@
                 mat-button
                 matStepperNext
                 [disabled]="dateTimeFormGroup.invalid"
+                [ngStyle]="{
+                  'background-color': dateTimeFormGroup.valid ? '#e0f2f1' : ''
+                }"
               >
                 Tovább
               </button>
@@ -152,7 +173,13 @@
         <form [formGroup]="detailsFormGroup">
           <div class="step-content">
             <h3>Foglalás részletei</h3>
-            <div class="appointment-summary">
+            <div
+              class="appointment-summary"
+              [ngClass]="{
+                'highlight-summary':
+                  dateTimeFormGroup.valid && locationFormGroup.valid
+              }"
+            >
               <p>
                 <strong>Szolgáltatás:</strong>
                 {{ getSelectedServiceViewValue() }}
@@ -179,6 +206,7 @@
                 matInput
                 formControlName="notes"
                 placeholder="További megjegyzések..."
+                [appFocus]="true"
               ></textarea>
             </mat-form-field>
 
@@ -204,3 +232,12 @@
     </mat-stepper>
   </mat-card-content>
 </mat-card>
+
+<style>
+  .highlight-summary {
+    background-color: #f0f7ff;
+    padding: 12px;
+    border-radius: 4px;
+    border-left: 4px solid #2196f3;
+  }
+</style>

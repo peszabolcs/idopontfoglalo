@@ -8,6 +8,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { TimeFormatPipe } from '../../pipes/time-format.pipe';
 import { StatusTranslatePipe } from '../../pipes/status-translate.pipe';
+import { HighlightDirective } from '../../directives/highlight.directive';
+import { StatusColorDirective } from '../../directives/status-color.directive';
 
 @Component({
   selector: 'app-appointment-card',
@@ -21,6 +23,8 @@ import { StatusTranslatePipe } from '../../pipes/status-translate.pipe';
     DateFormatPipe,
     TimeFormatPipe,
     StatusTranslatePipe,
+    HighlightDirective,
+    StatusColorDirective,
   ],
   templateUrl: './appointment-card.component.html',
   styleUrl: './appointment-card.component.css',

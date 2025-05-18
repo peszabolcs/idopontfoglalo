@@ -22,6 +22,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
 import { LocationService } from '../../services/location.service';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
+import { FocusDirective } from '../../directives/focus.directive';
+import { TimeValidatorDirective } from '../../directives/time-validator.directive';
+import { HighlightDirective } from '../../directives/highlight.directive';
 
 @Component({
   selector: 'app-appointment-booking',
@@ -42,6 +45,9 @@ import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
     MatIconModule,
     MatProgressSpinnerModule,
     MatStepperModule,
+    FocusDirective,
+    TimeValidatorDirective,
+    HighlightDirective,
   ],
   providers: [
     {

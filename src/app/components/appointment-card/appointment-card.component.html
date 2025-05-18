@@ -1,4 +1,4 @@
-<mat-card class="appointment-card">
+<mat-card class="appointment-card" appHighlight="#f0f7ff">
   <mat-card-header>
     <mat-card-title>
       {{ getServiceName(appointment.serviceId) || "Időpontfoglalás" }}
@@ -13,7 +13,7 @@
     <!-- Státusz megjelenítése ngSwitch direktívával -->
     <p><strong>Státusz:</strong></p>
     <div [ngSwitch]="appointment.status">
-      <div *ngSwitchCase="'pending'">
+      <div *ngSwitchCase="'pending'" appStatusColor="pending">
         <mat-chip color="accent" selected>
           {{ "pending" | statusTranslate }}
           <mat-icon>hourglass_empty</mat-icon>
@@ -23,7 +23,7 @@
         </p>
       </div>
 
-      <div *ngSwitchCase="'confirmed'">
+      <div *ngSwitchCase="'confirmed'" appStatusColor="confirmed">
         <mat-chip color="primary" selected>
           {{ "confirmed" | statusTranslate }}
           <mat-icon>check_circle</mat-icon>
@@ -33,7 +33,7 @@
         </p>
       </div>
 
-      <div *ngSwitchCase="'cancelled'">
+      <div *ngSwitchCase="'cancelled'" appStatusColor="cancelled">
         <mat-chip color="warn" selected>
           {{ "cancelled" | statusTranslate }}
           <mat-icon>cancel</mat-icon>
@@ -41,7 +41,7 @@
         <p class="status-description">Az időpont lemondásra került.</p>
       </div>
 
-      <div *ngSwitchCase="'completed'">
+      <div *ngSwitchCase="'completed'" appStatusColor="completed">
         <mat-chip color="primary" selected>
           {{ "completed" | statusTranslate }}
           <mat-icon>done_all</mat-icon>
@@ -68,6 +68,7 @@
       color="primary"
       *ngIf="isModifiable()"
       (click)="onEdit()"
+      [ngStyle]="{ 'margin-right': '8px' }"
     >
       <mat-icon>edit</mat-icon> Módosítás
     </button>
