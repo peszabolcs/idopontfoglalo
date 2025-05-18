@@ -8,6 +8,9 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DateFormatPipe } from '../../../pipes/date-format.pipe';
+import { StatusTranslatePipe } from '../../../pipes/status-translate.pipe';
+import { TimeFormatPipe } from '../../../pipes/time-format.pipe';
+import { ShortTextPipe } from '../../../pipes/short-text.pipe';
 import { RouterModule } from '@angular/router';
 import { LocationService } from '../../../services/location.service';
 import { ServiceService } from '../../../services/service.service';
@@ -27,6 +30,9 @@ import { ServiceService } from '../../../services/service.service';
     MatChipsModule,
     MatTooltipModule,
     DateFormatPipe,
+    StatusTranslatePipe,
+    TimeFormatPipe,
+    ShortTextPipe,
   ],
 })
 export class AppointmentListComponent {
@@ -41,6 +47,8 @@ export class AppointmentListComponent {
   ) {}
 
   getStatusText(status: string): string {
+    // Ez a metódus lecserélhető a StatusTranslatePipe-ra
+    // Megtartjuk a kompatibilitás érdekében
     switch (status) {
       case 'pending':
         return 'Függőben';

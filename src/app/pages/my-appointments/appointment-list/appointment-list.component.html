@@ -8,7 +8,7 @@
         <mat-card-subtitle>
           <mat-chip-set>
             <mat-chip [color]="getStatusColor(appointment.status)" selected>
-              {{ getStatusText(appointment.status) }}
+              {{ appointment.status | statusTranslate }}
             </mat-chip>
           </mat-chip-set>
         </mat-card-subtitle>
@@ -20,7 +20,7 @@
         <div class="appointment-details">
           <p>
             <strong>Időpont:</strong> {{ appointment.date | dateFormat }}
-            {{ appointment.time }}
+            {{ appointment.time | timeFormat }}
           </p>
           <p>
             <strong>Helyszín:</strong>
@@ -33,7 +33,8 @@
             </span>
           </p>
           <p *ngIf="appointment.notes">
-            <strong>Megjegyzés:</strong> {{ appointment.notes }}
+            <strong>Megjegyzés:</strong>
+            {{ appointment.notes | shortText : 150 }}
           </p>
         </div>
       </mat-card-content>
