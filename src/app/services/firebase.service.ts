@@ -54,7 +54,7 @@ export class FirebaseService {
     email: string,
     password: string,
     userData: Omit<UserModel, 'id' | 'createdAt' | 'lastLogin'>
-  ): Promise<string> {
+  ): Promise<{ uid: string; token: string }> {
     try {
       // First create the user with Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(
@@ -62,6 +62,9 @@ export class FirebaseService {
         email,
         password
       );
+
+      // Get auth token
+      const token = await userCredential.user.getIdToken();
 
       // Create user data object for Firestore
       const user: Omit<UserModel, 'id'> = {
@@ -82,7 +85,7 @@ export class FirebaseService {
         // since the authentication was successful
       }
 
-      return userCredential.user.uid;
+      return { uid: userCredential.user.uid, token };
     } catch (error: any) {
       console.error('Error registering user:', error);
       // Enhance error for better debugging
@@ -98,13 +101,20 @@ export class FirebaseService {
     }
   }
 
-  async loginUser(email: string, password: string): Promise<string> {
+  async loginUser(
+    email: string,
+    password: string
+  ): Promise<{ uid: string; token: string }> {
     try {
       const userCredential = await signInWithEmailAndPassword(
         this.auth,
         email,
         password
       );
+
+      // Get auth token
+      const token = await userCredential.user.getIdToken();
+
       const userDoc = await getDoc(
         doc(this.firestore, 'users', userCredential.user.uid)
       );
@@ -114,9 +124,9 @@ export class FirebaseService {
         await updateDoc(doc(this.firestore, 'users', userCredential.user.uid), {
           lastLogin: new Date(),
         });
-        return userCredential.user.uid;
+        return { uid: userCredential.user.uid, token };
       }
-      return '';
+      return { uid: '', token: '' };
     } catch (error) {
       console.error('Error logging in:', error);
       throw error;
