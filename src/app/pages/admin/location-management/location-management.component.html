@@ -1,0 +1,180 @@
+<div class="container">
+  <h1>Helyszínek kezelése</h1>
+
+  <!-- Helyszínek form -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{
+        editMode ? "Helyszín szerkesztése" : "Új helyszín hozzáadása"
+      }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="locationForm" (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Helyszín neve</mat-label>
+            <input
+              matInput
+              formControlName="name"
+              placeholder="Helyszín neve"
+            />
+            <mat-error *ngIf="hasError('name', 'required')"
+              >A helyszín neve kötelező!</mat-error
+            >
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Cím</mat-label>
+            <input matInput formControlName="address" placeholder="Cím" />
+            <mat-error *ngIf="hasError('address', 'required')"
+              >A cím kötelező!</mat-error
+            >
+          </mat-form-field>
+        </div>
+
+        <div class="form-row two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Város</mat-label>
+            <input matInput formControlName="city" placeholder="Város" />
+            <mat-error *ngIf="hasError('city', 'required')"
+              >A város kötelező!</mat-error
+            >
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Irányítószám</mat-label>
+            <input
+              matInput
+              formControlName="postalCode"
+              placeholder="Irányítószám"
+            />
+            <mat-error *ngIf="hasError('postalCode', 'required')"
+              >Az irányítószám kötelező!</mat-error
+            >
+          </mat-form-field>
+        </div>
+
+        <div class="active-status">
+          <mat-slide-toggle formControlName="isActive">
+            {{ locationForm.get("isActive")?.value ? "Aktív" : "Inaktív" }}
+          </mat-slide-toggle>
+        </div>
+
+        <h3>Nyitvatartási idők</h3>
+        <div formArrayName="openingHours">
+          <div
+            *ngFor="let dayControl of openingHoursArray.controls; let i = index"
+            class="opening-hours-row"
+            [formGroupName]="i"
+          >
+            <div class="day-name">{{ days[i] }}</div>
+            <div class="opening-hours-inputs">
+              <mat-form-field appearance="outline">
+                <mat-label>Nyitás</mat-label>
+                <input matInput formControlName="open" placeholder="08:00" />
+                <mat-error *ngIf="getOpeningHoursErrorMessage(i, 'open')">
+                  {{ getOpeningHoursErrorMessage(i, "open") }}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Zárás</mat-label>
+                <input matInput formControlName="close" placeholder="16:00" />
+                <mat-error *ngIf="getOpeningHoursErrorMessage(i, 'close')">
+                  {{ getOpeningHoursErrorMessage(i, "close") }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button mat-button type="button" (click)="resetForm()">Mégse</button>
+          <button mat-raised-button color="primary" type="submit">
+            {{ editMode ? "Mentés" : "Hozzáadás" }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Helyszínek listája -->
+  <div class="locations-table-container">
+    <h2>Helyszínek listája</h2>
+
+    <table mat-table [dataSource]="locations" class="locations-table">
+      <!-- Név oszlop -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Név</th>
+        <td mat-cell *matCellDef="let location">{{ location.name }}</td>
+      </ng-container>
+
+      <!-- Cím oszlop -->
+      <ng-container matColumnDef="address">
+        <th mat-header-cell *matHeaderCellDef>Cím</th>
+        <td mat-cell *matCellDef="let location">{{ location.address }}</td>
+      </ng-container>
+
+      <!-- Város oszlop -->
+      <ng-container matColumnDef="city">
+        <th mat-header-cell *matHeaderCellDef>Város</th>
+        <td mat-cell *matCellDef="let location">{{ location.city }}</td>
+      </ng-container>
+
+      <!-- Irányítószám oszlop -->
+      <ng-container matColumnDef="postalCode">
+        <th mat-header-cell *matHeaderCellDef>Irányítószám</th>
+        <td mat-cell *matCellDef="let location">{{ location.postalCode }}</td>
+      </ng-container>
+
+      <!-- Aktív státusz oszlop -->
+      <ng-container matColumnDef="isActive">
+        <th mat-header-cell *matHeaderCellDef>Státusz</th>
+        <td mat-cell *matCellDef="let location">
+          <span
+            class="status-label"
+            [class.active]="location.isActive"
+            [class.inactive]="!location.isActive"
+          >
+            {{ location.isActive ? "Aktív" : "Inaktív" }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Műveletek oszlop -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Műveletek</th>
+        <td mat-cell *matCellDef="let location">
+          <button
+            mat-icon-button
+            (click)="editLocation(location)"
+            matTooltip="Szerkesztés"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            (click)="deleteLocation(location)"
+            matTooltip="Törlés"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            (click)="toggleLocationStatus(location)"
+            matTooltip="{{ location.isActive ? 'Deaktiválás' : 'Aktiválás' }}"
+          >
+            <mat-icon>{{
+              location.isActive ? "toggle_on" : "toggle_off"
+            }}</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+</div>

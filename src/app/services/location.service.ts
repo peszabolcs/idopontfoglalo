@@ -3,6 +3,7 @@ import { IndexedDBService } from './indexed-db.service';
 import { FirebaseService } from './firebase.service';
 import { Location } from '../models';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -245,5 +246,89 @@ export class LocationService {
       name: 'Ismeretlen helyszín',
       address: '',
     };
+  }
+
+  // Add a new location
+  addLocation(location: Omit<Location, 'id'>): Observable<string> {
+    return new Observable<string>((observer) => {
+      this.firebaseService
+        .addLocation(location)
+        .then((id) => {
+          const newLocation = { ...location, id };
+          this.locations.set(id, newLocation);
+          this.locationsSubject.next(this.locations);
+
+          // Also save to IndexedDB as backup
+          this.indexedDB.addLocation(newLocation);
+
+          observer.next(id);
+          observer.complete();
+        })
+        .catch((error) => {
+          console.error('Error adding location:', error);
+          observer.error(error);
+        });
+    });
+  }
+
+  // Update an existing location
+  updateLocation(location: Location): Observable<boolean> {
+    return new Observable<boolean>((observer) => {
+      this.firebaseService
+        .updateLocation(location.id, location)
+        .then(() => {
+          this.locations.set(location.id, location);
+          this.locationsSubject.next(this.locations);
+
+          // Update in IndexedDB as well
+          this.indexedDB.updateLocation(location);
+
+          observer.next(true);
+          observer.complete();
+        })
+        .catch((error) => {
+          console.error(
+            `Error updating location with ID ${location.id}:`,
+            error
+          );
+          observer.error(error);
+        });
+    });
+  }
+
+  // Delete a location
+  deleteLocation(id: string): Observable<boolean> {
+    return new Observable<boolean>((observer) => {
+      this.firebaseService
+        .deleteLocation(id)
+        .then(() => {
+          this.locations.delete(id);
+          this.locationsSubject.next(this.locations);
+
+          // Remove from IndexedDB as well (convert string ID to number for IndexedDB)
+          try {
+            const numericId = parseInt(id);
+            if (!isNaN(numericId)) {
+              this.indexedDB.deleteLocation(numericId);
+            }
+          } catch (error) {
+            console.warn(`Could not convert ID to number for IndexedDB: ${id}`);
+          }
+
+          observer.next(true);
+          observer.complete();
+        })
+        .catch((error) => {
+          console.error(`Error deleting location with ID ${id}:`, error);
+          observer.error(error);
+        });
+    });
+  }
+
+  // Get locations as observable for real-time updates
+  getLocationsObservable(): Observable<Location[]> {
+    return this.locationsSubject
+      .asObservable()
+      .pipe(map((locationsMap) => Array.from(locationsMap.values())));
   }
 }
