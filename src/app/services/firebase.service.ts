@@ -1175,4 +1175,163 @@ export class FirebaseService {
       throw error;
     }
   }
+
+  /**
+   * Adminoknak: Felhasználók listázása lapozással
+   * @param lastVisible Az utolsó látható elem a korábbi lekérdezésből (lapozáshoz)
+   * @param pageSize Az oldalon megjelenítendő elemek száma
+   * @param orderByField A rendezés mezője
+   * @returns Felhasználók egy oldala és a következő lekérdezés cursor-ja
+   */
+  async getPaginatedUsers(
+    lastVisible: any = null,
+    pageSize: number = 10,
+    orderByField: string = 'name'
+  ): Promise<{ users: UserModel[]; lastVisible: any }> {
+    try {
+      const usersRef = collection(this.firestore, 'users');
+
+      let q;
+      if (lastVisible) {
+        q = query(
+          usersRef,
+          orderBy(orderByField),
+          startAfter(lastVisible),
+          limit(pageSize)
+        );
+      } else {
+        q = query(usersRef, orderBy(orderByField), limit(pageSize));
+      }
+
+      const snapshot = await getDocs(q);
+      const users = snapshot.docs.map((doc) => {
+        const data = doc.data() as Omit<UserModel, 'id'>;
+        return { id: doc.id, ...data } as UserModel;
+      });
+
+      // Get the last document for pagination
+      const lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+
+      return {
+        users,
+        lastVisible: lastVisibleDoc,
+      };
+    } catch (error) {
+      console.error('Error getting paginated users:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Top szolgáltatások lekérése használati gyakoriság alapján
+   * @param limit A listázandó szolgáltatások maximális száma
+   * @returns A leggyakrabban használt szolgáltatások
+   */
+  async getTopServices(limit: number = 5): Promise<Service[]> {
+    try {
+      // Először lekérjük az időpontokat szolgáltatások szerint csoportosítva
+      const appointmentsRef = collection(this.firestore, 'appointments');
+      const snapshot = await getDocs(appointmentsRef);
+
+      // Szolgáltatások használati gyakorisága
+      const serviceUsage: Record<string, number> = {};
+
+      // Számoljuk meg, hogy melyik szolgáltatást hányszor használták
+      snapshot.docs.forEach((doc) => {
+        const appointment = doc.data() as Appointment;
+        if (appointment.serviceId) {
+          if (!serviceUsage[appointment.serviceId]) {
+            serviceUsage[appointment.serviceId] = 0;
+          }
+          serviceUsage[appointment.serviceId]++;
+        }
+      });
+
+      // Rendezzük a szolgáltatásokat használati gyakoriság szerint csökkenő sorrendben
+      const sortedServiceIds = Object.keys(serviceUsage).sort(
+        (a, b) => serviceUsage[b] - serviceUsage[a]
+      );
+
+      // Csak a top N szolgáltatást vesszük
+      const topServiceIds = sortedServiceIds.slice(0, limit);
+
+      // Ha nincs egyetlen szolgáltatás sem, térjünk vissza üres tömbbel
+      if (topServiceIds.length === 0) {
+        return [];
+      }
+
+      // Lekérjük a top szolgáltatások részletes adatait
+      const services: Service[] = [];
+      for (const serviceId of topServiceIds) {
+        const serviceDoc = await getDoc(
+          doc(this.firestore, 'services', serviceId)
+        );
+        if (serviceDoc.exists()) {
+          const serviceData = serviceDoc.data() as Omit<Service, 'id'>;
+          services.push({ id: serviceId, ...serviceData } as Service);
+        }
+      }
+
+      return services;
+    } catch (error) {
+      console.error('Error getting top services:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Helyszínek lekérdezése lapozással és szűréssel
+   * @param filter Opcionális szűrési feltételek
+   * @param lastVisible Az utolsó látható elem a korábbi lekérdezésből (lapozáshoz)
+   * @param pageSize Az oldalon megjelenítendő elemek száma
+   * @returns Helyszínek egy oldala és a következő lekérdezés cursor-ja
+   */
+  async getPaginatedLocations(
+    filter: { city?: string; isActive?: boolean } = {},
+    lastVisible: any = null,
+    pageSize: number = 10
+  ): Promise<{ locations: Location[]; lastVisible: any }> {
+    try {
+      const locationsRef = collection(this.firestore, 'locations');
+      const queryConstraints: QueryConstraint[] = [];
+
+      // Szűrési feltételek hozzáadása
+      if (filter.city) {
+        queryConstraints.push(where('city', '==', filter.city));
+      }
+
+      if (filter.isActive !== undefined) {
+        queryConstraints.push(where('isActive', '==', filter.isActive));
+      }
+
+      // Mindig rendezünk név szerint
+      queryConstraints.push(orderBy('name'));
+
+      // Lapozáshoz hozzáadjuk a megfelelő startAfter és limit műveleteket
+      if (lastVisible) {
+        queryConstraints.push(startAfter(lastVisible));
+      }
+
+      queryConstraints.push(limit(pageSize));
+
+      const q = query(locationsRef, ...queryConstraints);
+      const snapshot = await getDocs(q);
+
+      const locations = snapshot.docs.map((doc) => {
+        const data = doc.data() as Omit<Location, 'id'>;
+        return { id: doc.id, ...data } as Location;
+      });
+
+      // Az utolsó dokumentum eltárolása a következő lapozáshoz
+      const lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+
+      return {
+        locations,
+        lastVisible: lastVisibleDoc,
+      };
+    } catch (error) {
+      console.error('Error getting paginated locations:', error);
+      throw error;
+    }
+  }
 }

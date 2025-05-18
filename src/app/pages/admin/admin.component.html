@@ -74,10 +74,10 @@
           <tbody>
             <tr *ngFor="let appointment of todaysAppointments">
               <td>{{ appointment.id }}</td>
-              <td>{{ appointment.userId }}</td>
+              <td>{{ getUserName(appointment.userId) }}</td>
               <td>{{ appointment.date }} {{ appointment.time }}</td>
-              <td>{{ appointment.locationId }}</td>
-              <td>{{ appointment.serviceId }}</td>
+              <td>{{ getLocationName(appointment.locationId) }}</td>
+              <td>{{ getServiceName(appointment.serviceId) }}</td>
               <td>
                 <span class="status" [ngClass]="appointment.status">{{
                   appointment.status
@@ -143,10 +143,10 @@
           <tbody>
             <tr *ngFor="let appointment of activeAppointments">
               <td>{{ appointment.id }}</td>
-              <td>{{ appointment.userId }}</td>
+              <td>{{ getUserName(appointment.userId) }}</td>
               <td>{{ appointment.date }} {{ appointment.time }}</td>
-              <td>{{ appointment.locationId }}</td>
-              <td>{{ appointment.serviceId }}</td>
+              <td>{{ getLocationName(appointment.locationId) }}</td>
+              <td>{{ getServiceName(appointment.serviceId) }}</td>
               <td>
                 <span class="status" [ngClass]="appointment.status">{{
                   appointment.status
@@ -211,10 +211,10 @@
           <tbody>
             <tr *ngFor="let appointment of pastAppointments">
               <td>{{ appointment.id }}</td>
-              <td>{{ appointment.userId }}</td>
+              <td>{{ getUserName(appointment.userId) }}</td>
               <td>{{ appointment.date }} {{ appointment.time }}</td>
-              <td>{{ appointment.locationId }}</td>
-              <td>{{ appointment.serviceId }}</td>
+              <td>{{ getLocationName(appointment.locationId) }}</td>
+              <td>{{ getServiceName(appointment.serviceId) }}</td>
               <td>
                 <span class="status" [ngClass]="appointment.status">{{
                   appointment.status
@@ -249,10 +249,10 @@
           <tbody>
             <tr *ngFor="let appointment of activeAppointments">
               <td>{{ appointment.id }}</td>
-              <td>{{ appointment.userId }}</td>
+              <td>{{ getUserName(appointment.userId) }}</td>
               <td>{{ appointment.date }} {{ appointment.time }}</td>
-              <td>{{ appointment.locationId }}</td>
-              <td>{{ appointment.serviceId }}</td>
+              <td>{{ getLocationName(appointment.locationId) }}</td>
+              <td>{{ getServiceName(appointment.serviceId) }}</td>
               <td>
                 <span class="status" [ngClass]="appointment.status">{{
                   appointment.status
@@ -341,7 +341,7 @@
             <li
               *ngFor="let key of getObjectKeys(appointmentStatistics.byService)"
             >
-              {{ key }}:
+              {{ getServiceName(key) }}:
               <strong>{{ appointmentStatistics.byService[key] }}</strong>
             </li>
           </ul>
@@ -361,7 +361,7 @@
                 let key of getObjectKeys(appointmentStatistics.byLocation)
               "
             >
-              {{ key }}:
+              {{ getLocationName(key) }}:
               <strong>{{ appointmentStatistics.byLocation[key] }}</strong>
             </li>
           </ul>

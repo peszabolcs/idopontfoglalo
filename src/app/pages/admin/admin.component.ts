@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FirebaseService } from '../../services/firebase.service';
-import { Appointment, Service, Location } from '../../models';
+import {
+  Appointment,
+  Service,
+  Location,
+  User as UserModel,
+} from '../../models';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -18,6 +23,11 @@ export class AdminComponent implements OnInit {
   todaysAppointments: Appointment[] = [];
   appointmentStatistics: any = null;
 
+  // Szolgáltatások és helyszínek adatai a megjelenítéshez
+  services: Service[] = [];
+  locations: Location[] = [];
+  users: UserModel[] = [];
+
   // Dátum intervallum kereséshez
   startDate: string = new Date().toISOString().split('T')[0]; // Mai dátum
   endDate: string = new Date(new Date().setDate(new Date().getDate() + 30))
@@ -31,8 +41,63 @@ export class AdminComponent implements OnInit {
 
   ngOnInit(): void {
     // Kezdeti adatok betöltése
+    this.loadAllServices();
+    this.loadAllLocations();
+    this.loadAllUsers();
     this.loadTodaysAppointments();
     this.loadAppointmentStatistics();
+  }
+
+  // Összes szolgáltatás betöltése
+  loadAllServices(): void {
+    this.firebaseService
+      .getServices()
+      .then((services) => {
+        this.services = services;
+      })
+      .catch((error) => {
+        console.error('Hiba a szolgáltatások betöltésekor:', error);
+      });
+  }
+
+  // Összes helyszín betöltése
+  loadAllLocations(): void {
+    this.firebaseService
+      .getLocations()
+      .then((locations) => {
+        this.locations = locations;
+      })
+      .catch((error) => {
+        console.error('Hiba a helyszínek betöltésekor:', error);
+      });
+  }
+
+  // Összes felhasználó betöltése
+  loadAllUsers(): void {
+    this.firebaseService
+      .getAllUsers()
+      .then((users) => {
+        this.users = users;
+      })
+      .catch((error) => {
+        console.error('Hiba a felhasználók betöltésekor:', error);
+      });
+  }
+
+  // Segédfüggvények a nevek megjelenítéséhez ID alapján
+  getServiceName(serviceId: string): string {
+    const service = this.services.find((s) => s.id === serviceId);
+    return service ? service.name : serviceId;
+  }
+
+  getLocationName(locationId: string): string {
+    const location = this.locations.find((l) => l.id === locationId);
+    return location ? location.name : locationId;
+  }
+
+  getUserName(userId: string): string {
+    const user = this.users.find((u) => u.id === userId);
+    return user ? user.name : userId;
   }
 
   // Segédmetódus objektum kulcsainak lekéréséhez a template-ben
