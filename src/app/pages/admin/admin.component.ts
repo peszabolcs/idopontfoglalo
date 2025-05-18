@@ -1,4 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { FirebaseService } from '../../services/firebase.service';
 import {
   Appointment,
@@ -16,7 +22,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
 })
-export class AdminComponent implements OnInit {
+export class AdminComponent implements OnInit, AfterViewInit {
   // Adattárolók az adminisztrációs feladatokhoz
   activeAppointments: Appointment[] = [];
   pastAppointments: Appointment[] = [];
@@ -37,6 +43,8 @@ export class AdminComponent implements OnInit {
   // Aktív nézet kezelése
   activeView: string = 'today';
 
+  @ViewChild('statsContainer', { static: false }) statsContainer?: ElementRef;
+
   constructor(private firebaseService: FirebaseService) {}
 
   ngOnInit(): void {
@@ -46,6 +54,33 @@ export class AdminComponent implements OnInit {
     this.loadAllUsers();
     this.loadTodaysAppointments();
     this.loadAppointmentStatistics();
+  }
+
+  ngAfterViewInit(): void {
+    // A statisztikai nézet inicializálása után futó kód
+    // Ellenőrizzük, hogy a statisztika nézet aktív-e
+    if (this.activeView === 'statistics' && this.statsContainer) {
+      console.log('Statisztikai nézet inicializálva');
+
+      // Késleltetés használata az Angular változásdetektálási ciklus miatt
+      setTimeout(() => {
+        // A statisztikai adatok megjelenítésének vizuális kiemelése
+        if (this.statsContainer?.nativeElement) {
+          const element = this.statsContainer.nativeElement;
+
+          // Például egy animáció vagy speciális stílus alkalmazása
+          element.classList.add('stats-initialized');
+
+          // Statisztikai kártyák fokozatos megjelenítése
+          const statsCards = element.querySelectorAll('.stats-card');
+          statsCards.forEach((card: HTMLElement, index: number) => {
+            setTimeout(() => {
+              card.classList.add('visible');
+            }, 100 * index); // Kártyánként eltérő késleltetés
+          });
+        }
+      }, 0);
+    }
   }
 
   // Összes szolgáltatás betöltése

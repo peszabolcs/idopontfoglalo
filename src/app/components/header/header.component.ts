@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+  Input,
+} from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,7 +29,11 @@ import { User } from '../../models';
     MatMenuModule,
   ],
 })
-export class HeaderComponent implements OnInit, OnDestroy {
+export class HeaderComponent implements OnInit, OnDestroy, OnChanges {
+  @Input() appTitle: string = 'Időpontfoglaló';
+  @Input() isDarkMode: boolean = false;
+  previousDarkMode: boolean = false;
+
   isMenuOpen = false;
   isLoggedIn = false;
   isAdmin = false;
@@ -37,6 +48,67 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.isLoggedIn = !!user;
       this.isAdmin = this.userService.isAdmin();
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Kezeljük a bementi paraméterek változásait
+    if (changes['isDarkMode'] && !changes['isDarkMode'].firstChange) {
+      // Ha a sötét mód változik (nem az első betöltés)
+      const newValue = changes['isDarkMode'].currentValue;
+      const previousValue = changes['isDarkMode'].previousValue;
+
+      console.log(`Sötét mód változott: ${previousValue} -> ${newValue}`);
+
+      // Téma változásának kezelése
+      if (newValue !== previousValue) {
+        this.updateTheme(newValue);
+      }
+    }
+
+    if (changes['appTitle']) {
+      // Ha az alkalmazás címe változik, naplózzuk
+      console.log(
+        `Alkalmazás címe frissítve: ${changes['appTitle'].currentValue}`
+      );
+
+      // Ha szükséges, a DOM frissítése az új címmel
+      this.updateAppTitle(changes['appTitle'].currentValue);
+    }
+  }
+
+  /**
+   * Téma frissítése a sötét mód alapján
+   * @param isDark Sötét mód bekapcsolt állapota
+   */
+  private updateTheme(isDark: boolean): void {
+    // A DOM-ban frissítjük a témát
+    const body = document.querySelector('body');
+    if (body) {
+      if (isDark) {
+        body.classList.add('dark-theme');
+        body.classList.remove('light-theme');
+      } else {
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+      }
+    }
+
+    // Mentsük el a jelenlegi értéket a későbbi összehasonlításokhoz
+    this.previousDarkMode = isDark;
+
+    // A localStorage-ban is eltároljuk a felhasználó preferenciáját
+    localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+  }
+
+  /**
+   * Alkalmazás címének frissítése a DOM-ban
+   * @param title Új cím
+   */
+  private updateAppTitle(title: string): void {
+    // Opcionális: a dokumentum címének frissítése
+    if (title) {
+      document.title = title;
+    }
   }
 
   ngOnDestroy(): void {
