@@ -643,6 +643,12 @@ export class FirebaseService {
       const appointmentsRef = collection(this.firestore, 'appointments');
       const queryConstraints: QueryConstraint[] = [];
 
+      // A status és date együtt indexelési hibát okoz
+      // Ezért ha startDate és status is meg van adva, csak az egyiket használjuk a lekérdezésben,
+      // majd a másik szerint memóriában szűrünk
+      let filterStatusInMemory = false;
+      let statusFilter = filters.status;
+
       // Csak azokat a feltételeket adjuk hozzá, amelyek meg vannak adva
       if (filters.userId) {
         queryConstraints.push(where('userId', '==', filters.userId));
@@ -656,8 +662,12 @@ export class FirebaseService {
         queryConstraints.push(where('serviceId', '==', filters.serviceId));
       }
 
-      if (filters.status) {
+      // Ha dátum és status is van, akkor csak a dátumot adjuk a lekérdezéshez
+      if (filters.status && !filters.startDate) {
         queryConstraints.push(where('status', '==', filters.status));
+      } else if (filters.status && filters.startDate) {
+        // Ha mindkettő van, a status alapján memóriában szűrünk majd
+        filterStatusInMemory = true;
       }
 
       // Dátum intervallum kezelése
@@ -669,18 +679,26 @@ export class FirebaseService {
         queryConstraints.push(where('date', '<=', filters.endDate));
       }
 
-      // Csak egy rendezést alkalmazunk, hogy elkerüljük az indexelési problémát
+      // Rendezés hozzáadása
       queryConstraints.push(orderBy('date', 'asc'));
 
       const q = query(appointmentsRef, ...queryConstraints);
       const snapshot = await getDocs(q);
 
-      // Az eredményeket memóriában rendezzük időpont szerint
-      const appointments = snapshot.docs.map((doc) => {
+      // Az eredményeket betöltjük
+      let appointments = snapshot.docs.map((doc) => {
         const data = doc.data() as Omit<Appointment, 'id'>;
         return { id: doc.id, ...data } as Appointment;
       });
 
+      // Ha szükséges, memóriában szűrjük status szerint
+      if (filterStatusInMemory && statusFilter) {
+        appointments = appointments.filter(
+          (app) => app.status === statusFilter
+        );
+      }
+
+      // Rendezés időpont szerint
       return appointments.sort((a, b) => {
         if (a.date !== b.date) return a.date.localeCompare(b.date);
         return a.time.localeCompare(b.time);
@@ -746,22 +764,35 @@ export class FirebaseService {
       };
 
       // Időpontok lekérdezése a megadott időszakra
+      // A where('date', '>=', startDate), where('date', '<=', endDate) együttes használata
+      // indexelési hibát okozhat, ezért csak az egyik feltételt használjuk
       const appointmentsRef = collection(this.firestore, 'appointments');
-      const q = query(
-        appointmentsRef,
-        where('date', '>=', startDate),
-        where('date', '<=', endDate)
-      );
+      const q = query(appointmentsRef, where('date', '>=', startDate));
       const snapshot = await getDocs(q);
 
-      // Statisztika kiszámítása
+      // Statisztika kiszámítása minden dokumentumra, de csak a megfelelő dátum tartományból
       snapshot.docs.forEach((doc) => {
         const appointment = doc.data() as Appointment;
+
+        // Ellenőrizzük, hogy a dátum a tartományon belül van-e
+        if (appointment.date > endDate) {
+          return; // Kihagyjuk a túl kései időpontokat
+        }
+
         statistics.total++;
 
         // Státusz szerint számolás
         if (appointment.status) {
-          statistics[appointment.status]++;
+          // Számolás előtt ellenőrizzük, hogy létezik-e a mező a statisztikában
+          const status = appointment.status as
+            | 'pending'
+            | 'confirmed'
+            | 'cancelled'
+            | 'completed';
+          if (status === 'pending') statistics.pending++;
+          else if (status === 'confirmed') statistics.confirmed++;
+          else if (status === 'cancelled') statistics.cancelled++;
+          else if (status === 'completed') statistics.completed++;
         }
 
         // Szolgáltatás szerint számolás
