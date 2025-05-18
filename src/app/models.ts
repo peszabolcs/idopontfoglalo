@@ -1,5 +1,5 @@
 export interface User {
-  id?: number;
+  id?: string;
   email: string;
   password: string;
   name: string;
@@ -9,7 +9,7 @@ export interface User {
 }
 
 export interface Service {
-  id: number;
+  id: string;
   name: string;
   description: string;
   duration: number; // in minutes
@@ -18,7 +18,7 @@ export interface Service {
 }
 
 export interface Location {
-  id: number;
+  id: string;
   name: string;
   address: string;
   city: string;
@@ -33,10 +33,10 @@ export interface Location {
 }
 
 export interface Appointment {
-  id?: number;
-  userId: number;
-  serviceId: number;
-  locationId: number;
+  id?: string;
+  userId: string;
+  serviceId: string;
+  locationId: string;
   date: string;
   time: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';

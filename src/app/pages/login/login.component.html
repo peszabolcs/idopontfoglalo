@@ -31,11 +31,25 @@
           <mat-label>Jelszó</mat-label>
           <input
             matInput
-            type="password"
+            [type]="hidePassword ? 'password' : 'text'"
             formControlName="password"
             placeholder="Jelszó"
           />
           <mat-icon matPrefix>lock</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="
+              'Jelszó ' + (hidePassword ? 'mutatása' : 'elrejtése')
+            "
+            [attr.aria-pressed]="!hidePassword"
+          >
+            <mat-icon>{{
+              hidePassword ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
           <mat-error
             *ngIf="
               loginForm.get('password')?.invalid &&
@@ -47,7 +61,7 @@
         </mat-form-field>
 
         <div class="form-options">
-          <mat-checkbox>Emlékezz rám</mat-checkbox>
+          <mat-checkbox formControlName="rememberMe">Emlékezz rám</mat-checkbox>
           <a href="#" class="forgot-password">
             <mat-icon>help</mat-icon>
             Elfelejtett jelszó?
@@ -58,11 +72,17 @@
           mat-raised-button
           color="primary"
           type="submit"
-          [disabled]="loginForm.invalid"
+          [disabled]="loginForm.invalid || isLoading"
           class="submit-button"
         >
-          <mat-icon>login</mat-icon>
-          Bejelentkezés
+          <mat-icon *ngIf="!isLoading">login</mat-icon>
+          <mat-spinner
+            *ngIf="isLoading"
+            [diameter]="24"
+            color="accent"
+          ></mat-spinner>
+          <span *ngIf="!isLoading">Bejelentkezés</span>
+          <span *ngIf="isLoading">Bejelentkezés...</span>
         </button>
 
         <div class="auth-divider">

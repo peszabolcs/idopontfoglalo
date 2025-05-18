@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AppointmentService } from '../../services/appointment.service';
-import { Appointment } from '../../models';
+import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -17,6 +18,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-appointment-booking',
@@ -35,9 +37,10 @@ import { MatIconModule } from '@angular/material/icon';
     MatSnackBarModule,
     MatCardModule,
     MatIconModule,
+    MatProgressSpinnerModule,
   ],
 })
-export class AppointmentBookingComponent {
+export class AppointmentBookingComponent implements OnInit {
   appointmentForm: FormGroup;
   services = [
     { value: 'szemelyi', viewValue: 'Személyi igazolvány' },
@@ -46,25 +49,42 @@ export class AppointmentBookingComponent {
     { value: 'lakcimkartya', viewValue: 'Lakcímkártya' },
     { value: 'other', viewValue: 'Egyéb' },
   ];
+  isLoading = false;
+  minDate = new Date();
 
   constructor(
     private fb: FormBuilder,
     private appointmentService: AppointmentService,
+    private userService: UserService,
+    private router: Router,
     private snackBar: MatSnackBar
   ) {
+    // Beállítjuk a minimum dátumot holnapra
+    this.minDate.setDate(this.minDate.getDate() + 1);
+
+    // Inicializáljuk az űrlapot
     this.appointmentForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
+      service: ['', Validators.required],
       date: ['', Validators.required],
       time: ['', Validators.required],
-      service: ['', Validators.required],
       notes: [''],
     });
+  }
+
+  ngOnInit(): void {
+    // Ellenőrizzük, hogy a felhasználó be van-e jelentkezve
+    if (!this.userService.isLoggedIn()) {
+      this.snackBar.open('Időpontfoglaláshoz be kell jelentkezni!', 'Bezár', {
+        duration: 3000,
+      });
+      this.router.navigate(['/bejelentkezes']);
+    }
   }
 
   async onSubmit() {
     if (this.appointmentForm.valid) {
       try {
+        this.isLoading = true;
         const formValue = this.appointmentForm.value;
         const date = new Date(formValue.date);
         const formattedDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
@@ -79,8 +99,11 @@ export class AppointmentBookingComponent {
           horizontalPosition: 'center',
           verticalPosition: 'top',
         });
-        this.appointmentForm.reset();
+
+        // Sikeres foglalás után átirányítjuk a felhasználót a foglalásai oldalra
+        this.router.navigate(['/foglalasaim']);
       } catch (error) {
+        console.error('Error booking appointment:', error);
         this.snackBar.open(
           'Hiba történt az időpont foglalása során.',
           'Bezár',
@@ -90,8 +113,11 @@ export class AppointmentBookingComponent {
             verticalPosition: 'top',
           }
         );
+      } finally {
+        this.isLoading = false;
       }
     } else {
+      this.appointmentForm.markAllAsTouched();
       this.snackBar.open(
         'Kérjük, töltse ki az összes kötelező mezőt!',
         'Bezár',

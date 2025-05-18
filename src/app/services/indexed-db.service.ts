@@ -222,7 +222,7 @@ export class IndexedDBService {
     });
   }
 
-  async getUserById(id: number): Promise<User | null> {
+  async getUserById(id: string | number): Promise<User | null> {
     await this.ensureDBInitialized();
     return new Promise((resolve, reject) => {
       if (!this.db) {

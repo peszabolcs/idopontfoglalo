@@ -10,44 +10,30 @@
       class="appointment-form"
     >
       <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Név</mat-label>
-        <input
-          matInput
-          type="text"
-          formControlName="name"
-          placeholder="Teljes név"
-        />
+        <mat-label>Ügyintézési típus</mat-label>
+        <mat-select formControlName="service">
+          <mat-option *ngFor="let service of services" [value]="service.value">
+            {{ service.viewValue }}
+          </mat-option>
+        </mat-select>
         <mat-error
           *ngIf="
-            appointmentForm.get('name')?.invalid &&
-            appointmentForm.get('name')?.touched
+            appointmentForm.get('service')?.invalid &&
+            appointmentForm.get('service')?.touched
           "
         >
-          A név megadása kötelező és legalább 2 karakter hosszú
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Email cím</mat-label>
-        <input
-          matInput
-          type="email"
-          formControlName="email"
-          placeholder="pelda@email.com"
-        />
-        <mat-error
-          *ngIf="
-            appointmentForm.get('email')?.invalid &&
-            appointmentForm.get('email')?.touched
-          "
-        >
-          Kérjük, adjon meg egy érvényes email címet
+          A szolgáltatás kiválasztása kötelező
         </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="form-field">
         <mat-label>Dátum</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="date" />
+        <input
+          matInput
+          [matDatepicker]="picker"
+          formControlName="date"
+          [min]="minDate"
+        />
         <mat-datepicker-toggle
           matIconSuffix
           [for]="picker"
@@ -77,23 +63,6 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Ügyintézési típus</mat-label>
-        <mat-select formControlName="service">
-          <mat-option *ngFor="let service of services" [value]="service.value">
-            {{ service.viewValue }}
-          </mat-option>
-        </mat-select>
-        <mat-error
-          *ngIf="
-            appointmentForm.get('service')?.invalid &&
-            appointmentForm.get('service')?.touched
-          "
-        >
-          A szolgáltatás kiválasztása kötelező
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="form-field">
         <mat-label>Megjegyzés</mat-label>
         <textarea
           matInput
@@ -106,9 +75,15 @@
         mat-raised-button
         color="primary"
         type="submit"
-        [disabled]="appointmentForm.invalid"
+        [disabled]="appointmentForm.invalid || isLoading"
+        class="submit-button"
       >
-        Időpont foglalása
+        <mat-spinner
+          *ngIf="isLoading"
+          diameter="24"
+          color="accent"
+        ></mat-spinner>
+        <span *ngIf="!isLoading">Időpont foglalása</span>
       </button>
     </form>
   </mat-card-content>

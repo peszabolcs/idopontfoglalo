@@ -2,14 +2,13 @@
   <div *ngFor="let appointment of appointments" class="appointment-card">
     <mat-card>
       <mat-card-header>
-        <mat-card-title>{{ appointment.serviceId }}</mat-card-title>
+        <mat-card-title>{{
+          getServiceName(appointment.serviceId)
+        }}</mat-card-title>
         <mat-card-subtitle>
           <mat-chip-set>
-            <mat-chip
-              [color]="showPastAppointments ? 'warn' : 'primary'"
-              selected
-            >
-              {{ showPastAppointments ? "Lezárt" : "Aktív" }}
+            <mat-chip [color]="getStatusColor(appointment.status)" selected>
+              {{ getStatusText(appointment.status) }}
             </mat-chip>
           </mat-chip-set>
         </mat-card-subtitle>
@@ -23,12 +22,26 @@
             <strong>Időpont:</strong> {{ appointment.date | dateFormat }}
             {{ appointment.time }}
           </p>
-          <p><strong>Helyszín:</strong> {{ appointment.locationId }}</p>
-          <p><strong>Megjegyzés:</strong> {{ appointment.notes }}</p>
+          <p>
+            <strong>Helyszín:</strong>
+            {{ getLocationName(appointment.locationId) }}
+            <span
+              *ngIf="getLocationAddress(appointment.locationId)"
+              class="location-address"
+            >
+              ({{ getLocationAddress(appointment.locationId) }})
+            </span>
+          </p>
+          <p *ngIf="appointment.notes">
+            <strong>Megjegyzés:</strong> {{ appointment.notes }}
+          </p>
         </div>
       </mat-card-content>
 
-      <mat-card-actions *ngIf="!showPastAppointments" align="end">
+      <mat-card-actions
+        *ngIf="isAppointmentModifiable(appointment)"
+        align="end"
+      >
         <button
           mat-button
           color="primary"

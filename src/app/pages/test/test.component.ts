@@ -1,105 +1,97 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserService } from '../../services/user.service';
-import { AppointmentService } from '../../services/appointment.service';
-import { ServiceService } from '../../services/service.service';
-import { LocationService } from '../../services/location.service';
-import { User, Service, Location, Appointment } from '../../models';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCardModule } from '@angular/material/card';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { FirebaseService } from '../../services/firebase.service';
+import { Service } from '../../models';
 
 @Component({
   selector: 'app-test',
   templateUrl: './test.component.html',
   styleUrls: ['./test.component.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatCardModule,
+    MatSnackBarModule,
+  ],
 })
 export class TestComponent implements OnInit {
-  users: User[] = [];
   services: Service[] = [];
-  locations: Location[] = [];
-  appointments: Appointment[] = [];
+  newService: Omit<Service, 'id'> = {
+    name: '',
+    description: '',
+    duration: 30,
+    isActive: true,
+    price: 0,
+  };
 
   constructor(
-    private userService: UserService,
-    private appointmentService: AppointmentService,
-    private serviceService: ServiceService,
-    private locationService: LocationService
+    private firebaseService: FirebaseService,
+    private snackBar: MatSnackBar
   ) {}
 
-  async ngOnInit() {
-    await this.testAllServices();
+  ngOnInit() {
+    this.loadServices();
   }
 
-  async testAllServices() {
+  async loadServices() {
     try {
-      // Teszt felhasználó létrehozása
-      const testUser: Omit<User, 'id' | 'createdAt' | 'lastLogin'> = {
-        email: 'test@example.com',
-        password: 'password123',
-        name: 'Test User',
-        isAdmin: false,
-      };
-      const userId = await this.userService.register(testUser);
-      console.log('Created user with ID:', userId);
+      this.services = await this.firebaseService.getServices();
+    } catch (error) {
+      console.error('Error loading services:', error);
+      this.snackBar.open(
+        'Hiba történt a szolgáltatások betöltésekor',
+        'Bezár',
+        {
+          duration: 3000,
+        }
+      );
+    }
+  }
 
-      // Teszt szolgáltatás létrehozása
-      const testService: Omit<Service, 'id'> = {
-        name: 'Személyi igazolvány',
-        description: 'Személyi igazolvány igénylése',
+  async addService() {
+    try {
+      await this.firebaseService.addService(this.newService);
+      this.snackBar.open('Szolgáltatás sikeresen hozzáadva', 'Bezár', {
+        duration: 3000,
+      });
+      this.newService = {
+        name: '',
+        description: '',
         duration: 30,
         isActive: true,
-        price: 3000,
+        price: 0,
       };
-      const serviceId = await this.serviceService.addService(testService);
-      console.log('Created service with ID:', serviceId);
-
-      // Teszt helyszín létrehozása
-      const testLocation: Omit<Location, 'id'> = {
-        name: 'Központi Okmányiroda',
-        address: 'Budapest, Váci út 60-62',
-        city: 'Budapest',
-        postalCode: '1134',
-        openingHours: {
-          monday: { open: '08:00', close: '16:00' },
-          tuesday: { open: '08:00', close: '16:00' },
-          wednesday: { open: '08:00', close: '16:00' },
-          thursday: { open: '08:00', close: '16:00' },
-          friday: { open: '08:00', close: '16:00' },
-        },
-        isActive: true,
-      };
-      const locationId = await this.locationService.addLocation(testLocation);
-      console.log('Created location with ID:', locationId);
-
-      // Teszt időpont létrehozása
-      const testAppointment: Omit<
-        Appointment,
-        'id' | 'createdAt' | 'updatedAt' | 'status'
-      > = {
-        userId: userId,
-        serviceId: serviceId,
-        locationId: locationId,
-        date: '2024-03-20',
-        time: '10:00',
-        notes: 'Teszt időpont',
-      };
-      const appointmentId = await this.appointmentService.createAppointment(
-        testAppointment
-      );
-      console.log('Created appointment with ID:', appointmentId);
-
-      // Összes adat lekérdezése
-      this.users = await this.userService.getAllUsers();
-      this.services = await this.serviceService.getAllServices();
-      this.locations = await this.locationService.getAllLocations();
-      this.appointments = await this.appointmentService.getAllAppointments();
-
-      console.log('All users:', this.users);
-      console.log('All services:', this.services);
-      console.log('All locations:', this.locations);
-      console.log('All appointments:', this.appointments);
+      await this.loadServices();
     } catch (error) {
-      console.error('Error during testing:', error);
+      console.error('Error adding service:', error);
+      this.snackBar.open('Hiba történt a szolgáltatás hozzáadásakor', 'Bezár', {
+        duration: 3000,
+      });
+    }
+  }
+
+  async deleteService(id: string) {
+    try {
+      await this.firebaseService.deleteService(id);
+      this.snackBar.open('Szolgáltatás sikeresen törölve', 'Bezár', {
+        duration: 3000,
+      });
+      await this.loadServices();
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      this.snackBar.open('Hiba történt a szolgáltatás törlésekor', 'Bezár', {
+        duration: 3000,
+      });
     }
   }
 }

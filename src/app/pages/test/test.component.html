@@ -1,42 +1,76 @@
 <div class="test-container">
-  <h1>Szolgáltatások tesztelése</h1>
+  <mat-card class="test-card">
+    <mat-card-header>
+      <mat-card-title>Firebase Teszt</mat-card-title>
+      <mat-card-subtitle>Szolgáltatások kezelése</mat-card-subtitle>
+    </mat-card-header>
 
-  <div class="data-section">
-    <h2>Felhasználók</h2>
-    <div *ngFor="let user of users" class="data-item">
-      <p><strong>Név:</strong> {{ user.name }}</p>
-      <p><strong>Email:</strong> {{ user.email }}</p>
-      <p><strong>Admin:</strong> {{ user.isAdmin ? "Igen" : "Nem" }}</p>
-    </div>
-  </div>
+    <mat-card-content>
+      <!-- Új szolgáltatás hozzáadása -->
+      <div class="form-section">
+        <h3>Új szolgáltatás hozzáadása</h3>
+        <mat-form-field appearance="outline">
+          <mat-label>Név</mat-label>
+          <input
+            matInput
+            [(ngModel)]="newService.name"
+            placeholder="Szolgáltatás neve"
+          />
+        </mat-form-field>
 
-  <div class="data-section">
-    <h2>Szolgáltatások</h2>
-    <div *ngFor="let service of services" class="data-item">
-      <p><strong>Név:</strong> {{ service.name }}</p>
-      <p><strong>Leírás:</strong> {{ service.description }}</p>
-      <p><strong>Időtartam:</strong> {{ service.duration }} perc</p>
-      <p><strong>Ár:</strong> {{ service.price }} Ft</p>
-    </div>
-  </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Leírás</mat-label>
+          <input
+            matInput
+            [(ngModel)]="newService.description"
+            placeholder="Szolgáltatás leírása"
+          />
+        </mat-form-field>
 
-  <div class="data-section">
-    <h2>Helyszínek</h2>
-    <div *ngFor="let location of locations" class="data-item">
-      <p><strong>Név:</strong> {{ location.name }}</p>
-      <p><strong>Cím:</strong> {{ location.address }}</p>
-      <p><strong>Város:</strong> {{ location.city }}</p>
-      <p><strong>Irsz.:</strong> {{ location.postalCode }}</p>
-    </div>
-  </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Időtartam (perc)</mat-label>
+          <input matInput type="number" [(ngModel)]="newService.duration" />
+        </mat-form-field>
 
-  <div class="data-section">
-    <h2>Időpontok</h2>
-    <div *ngFor="let appointment of appointments" class="data-item">
-      <p><strong>Dátum:</strong> {{ appointment.date }}</p>
-      <p><strong>Idő:</strong> {{ appointment.time }}</p>
-      <p><strong>Státusz:</strong> {{ appointment.status }}</p>
-      <p><strong>Megjegyzés:</strong> {{ appointment.notes }}</p>
-    </div>
-  </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Ár</mat-label>
+          <input matInput type="number" [(ngModel)]="newService.price" />
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="addService()"
+          [disabled]="!newService.name"
+        >
+          Hozzáadás
+        </button>
+      </div>
+
+      <!-- Szolgáltatások listája -->
+      <div class="list-section">
+        <h3>Szolgáltatások listája</h3>
+        <div class="services-list">
+          <mat-card *ngFor="let service of services" class="service-card">
+            <mat-card-content>
+              <h4>{{ service.name }}</h4>
+              <p>{{ service.description }}</p>
+              <p>Időtartam: {{ service.duration }} perc</p>
+              <p>Ár: {{ service.price }} Ft</p>
+              <p>Státusz: {{ service.isActive ? "Aktív" : "Inaktív" }}</p>
+            </mat-card-content>
+            <mat-card-actions>
+              <button
+                mat-button
+                color="warn"
+                (click)="deleteService(service.id)"
+              >
+                Törlés
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>

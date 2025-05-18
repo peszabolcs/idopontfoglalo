@@ -5,27 +5,101 @@
         <span class="logo-text">Időpontfoglaló</span>
       </a>
 
-      <button class="menu-toggle" (click)="toggleMenu()" aria-label="Menü megnyitása">
+      <button
+        class="menu-toggle"
+        (click)="toggleMenu()"
+        aria-label="Menü megnyitása"
+      >
         <span class="menu-icon"></span>
       </button>
 
       <nav class="nav" [class.open]="isMenuOpen">
         <ul class="nav-list">
           <li class="nav-item">
-            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">Főoldal</a>
+            <a
+              routerLink="/"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="nav-link"
+              >Főoldal</a
+            >
           </li>
-          <li class="nav-item">
-            <a routerLink="/idopontfoglalas" routerLinkActive="active" class="nav-link">Időpontfoglalás</a>
-          </li>
-          <li class="nav-item">
-            <a routerLink="/foglalasaim" routerLinkActive="active" class="nav-link">Foglalásaim</a>
-          </li>
-          <li class="nav-item">
-            <a routerLink="/bejelentkezes" routerLinkActive="active" class="nav-link login-btn">Bejelentkezés</a>
-          </li>
+
+          <!-- Navigation links for authenticated users -->
+          <ng-container *ngIf="isLoggedIn">
+            <li class="nav-item">
+              <a
+                routerLink="/idopontfoglalas"
+                routerLinkActive="active"
+                class="nav-link"
+                >Időpontfoglalás</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                routerLink="/foglalasaim"
+                routerLinkActive="active"
+                class="nav-link"
+                >Foglalásaim</a
+              >
+            </li>
+
+            <!-- Admin links -->
+            <li class="nav-item" *ngIf="isAdmin">
+              <a
+                routerLink="/admin"
+                routerLinkActive="active"
+                class="nav-link admin-link"
+              >
+                <mat-icon>admin_panel_settings</mat-icon>
+                Admin
+              </a>
+            </li>
+
+            <!-- User menu -->
+            <li class="nav-item user-menu">
+              <button
+                mat-button
+                [matMenuTriggerFor]="userMenu"
+                class="user-menu-button"
+              >
+                <mat-icon>account_circle</mat-icon>
+                {{ currentUser?.name || "Felhasználó" }}
+              </button>
+              <mat-menu #userMenu="matMenu">
+                <button mat-menu-item routerLink="/profil">
+                  <mat-icon>person</mat-icon>
+                  <span>Profilom</span>
+                </button>
+                <button mat-menu-item (click)="logout()">
+                  <mat-icon>exit_to_app</mat-icon>
+                  <span>Kijelentkezés</span>
+                </button>
+              </mat-menu>
+            </li>
+          </ng-container>
+
+          <!-- Links for non-authenticated users -->
+          <ng-container *ngIf="!isLoggedIn">
+            <li class="nav-item">
+              <a
+                routerLink="/bejelentkezes"
+                routerLinkActive="active"
+                class="nav-link login-btn"
+                >Bejelentkezés</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                routerLink="/regisztracio"
+                routerLinkActive="active"
+                class="nav-link register-btn"
+                >Regisztráció</a
+              >
+            </li>
+          </ng-container>
         </ul>
       </nav>
     </div>
   </div>
 </header>
-
