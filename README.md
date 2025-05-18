@@ -1,4 +1,8 @@
 # Okmányirodai ügyintézés időpontfoglaló oldal
+Amennyiben ki szeretnéd próbálni az admin funkciókat:
+email: tesztJ@gmail.com
+jelszó: teszt123
+
 
 ## Projekt Áttekintés
 
