@@ -26,45 +26,47 @@
         </mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Dátum</mat-label>
-        <input
-          matInput
-          [matDatepicker]="picker"
-          formControlName="date"
-          [min]="minDate"
-        />
-        <mat-datepicker-toggle
-          matIconSuffix
-          [for]="picker"
-        ></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-        <mat-error
-          *ngIf="
-            appointmentForm.get('date')?.invalid &&
-            appointmentForm.get('date')?.touched
-          "
-        >
-          A dátum megadása kötelező
-        </mat-error>
-      </mat-form-field>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Dátum</mat-label>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            formControlName="date"
+            [min]="minDate"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error
+            *ngIf="
+              appointmentForm.get('date')?.invalid &&
+              appointmentForm.get('date')?.touched
+            "
+          >
+            A dátum megadása kötelező
+          </mat-error>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Időpont</mat-label>
-        <mat-select formControlName="time">
-          <mat-option *ngFor="let time of availableTimes" [value]="time">
-            {{ time }}
-          </mat-option>
-        </mat-select>
-        <mat-error
-          *ngIf="
-            appointmentForm.get('time')?.invalid &&
-            appointmentForm.get('time')?.touched
-          "
-        >
-          Az időpont kiválasztása kötelező
-        </mat-error>
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Időpont</mat-label>
+          <mat-select formControlName="time">
+            <mat-option *ngFor="let time of availableTimes" [value]="time">
+              {{ time }}
+            </mat-option>
+          </mat-select>
+          <mat-error
+            *ngIf="
+              appointmentForm.get('time')?.invalid &&
+              appointmentForm.get('time')?.touched
+            "
+          >
+            Az időpont kiválasztása kötelező
+          </mat-error>
+        </mat-form-field>
+      </div>
 
       <mat-form-field appearance="outline" class="form-field">
         <mat-label>Megjegyzés</mat-label>

@@ -1,48 +1,82 @@
+@use "../../../styles/variables" as vars;
+
 .my-appointments-container {
   max-width: 800px;
   margin: 0 auto;
+  padding: 0 1rem;
+
+  @media (min-width: vars.$breakpoint-sm) {
+    padding: 0 1.5rem;
+  }
 
   h1 {
-    margin-bottom: 1rem;
-    color: #333;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    color: vars.$gray-800;
+
+    @media (min-width: vars.$breakpoint-sm) {
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+    }
   }
 
   p {
-    margin-bottom: 2rem;
-    color: #666;
+    margin-bottom: 1.5rem;
+    color: vars.$gray-600;
+    font-size: 0.9rem;
+
+    @media (min-width: vars.$breakpoint-sm) {
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
   }
 
   .appointments-tabs {
     display: flex;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #ddd;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid vars.$gray-200;
+    overflow-x: auto; // Mobile scrolling support
+    -webkit-overflow-scrolling: touch;
+
+    @media (min-width: vars.$breakpoint-sm) {
+      margin-bottom: 1.5rem;
+    }
 
     .tab-btn {
-      padding: 0.75rem 1.5rem;
+      padding: 0.75rem 1rem;
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 1rem;
-      color: #666;
+      font-size: 0.9rem;
+      color: vars.$gray-600;
       position: relative;
+      white-space: nowrap;
+      flex-shrink: 0;
+
+      @media (min-width: vars.$breakpoint-sm) {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+      }
 
       &.active {
-        color: #333;
+        color: vars.$primary-color;
         font-weight: 500;
 
         &:after {
-          content: '';
+          content: "";
           position: absolute;
           bottom: -1px;
           left: 0;
           width: 100%;
           height: 2px;
-          background-color: #3f51b5;
+          background-color: vars.$primary-color;
         }
       }
 
       &:hover {
-        color: #333;
+        color: vars.$gray-800;
       }
     }
   }
@@ -117,6 +151,14 @@
       }
     }
   }
+
+  .loading-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 0;
+    color: vars.$gray-600;
+  }
 }
 
 @media (max-width: 768px) {
@@ -148,4 +190,3 @@
     }
   }
 }
-
