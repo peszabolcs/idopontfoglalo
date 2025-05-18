@@ -1,0 +1,112 @@
+<h2 mat-dialog-title>Időpont szerkesztése</h2>
+<mat-dialog-content>
+  <form [formGroup]="editForm" class="edit-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Felhasználó</mat-label>
+      <mat-select formControlName="userId" required>
+        <mat-option *ngFor="let user of data.users" [value]="user.id">
+          {{ user.name }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="editForm.get('userId')?.hasError('required')">
+        Felhasználó kiválasztása kötelező
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Szolgáltatás</mat-label>
+      <mat-select formControlName="serviceId" required>
+        <mat-option *ngFor="let service of data.services" [value]="service.id">
+          {{ service.name }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="editForm.get('serviceId')?.hasError('required')">
+        Szolgáltatás kiválasztása kötelező
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Helyszín</mat-label>
+      <mat-select formControlName="locationId" required>
+        <mat-option
+          *ngFor="let location of data.locations"
+          [value]="location.id"
+        >
+          {{ location.name }} ({{ location.address }})
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="editForm.get('locationId')?.hasError('required')">
+        Helyszín kiválasztása kötelező
+      </mat-error>
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-col">
+        <mat-label>Dátum</mat-label>
+        <input
+          matInput
+          [matDatepicker]="picker"
+          formControlName="date"
+          [min]="minDate"
+          placeholder="Válasszon dátumot"
+          required
+        />
+        <mat-hint>Válassza ki a foglalás dátumát</mat-hint>
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="picker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="editForm.get('date')?.hasError('required')">
+          Dátum kiválasztása kötelező
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-col">
+        <mat-label>Időpont</mat-label>
+        <mat-select formControlName="time" required>
+          <mat-option *ngFor="let time of availableTimes" [value]="time">
+            {{ time }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="editForm.get('time')?.hasError('required')">
+          Időpont kiválasztása kötelező
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Állapot</mat-label>
+      <mat-select formControlName="status" required>
+        <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+          {{ status.viewValue }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="editForm.get('status')?.hasError('required')">
+        Állapot kiválasztása kötelező
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Megjegyzések</mat-label>
+      <textarea
+        matInput
+        formControlName="notes"
+        placeholder="Opcionális megjegyzések"
+        rows="3"
+      ></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Mégsem</button>
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="!editForm.valid"
+    (click)="onSave()"
+  >
+    Mentés
+  </button>
+</mat-dialog-actions>

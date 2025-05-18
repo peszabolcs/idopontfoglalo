@@ -6,6 +6,7 @@ import {
   ElementRef,
 } from '@angular/core';
 import { FirebaseService } from '../../services/firebase.service';
+import { AppointmentService } from '../../services/appointment.service';
 import {
   Appointment,
   Service,
@@ -14,13 +15,16 @@ import {
 } from '../../models';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { AdminAppointmentEditDialogComponent } from './admin-appointment-edit-dialog/admin-appointment-edit-dialog.component';
 
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
 })
 export class AdminComponent implements OnInit, AfterViewInit {
   // Adattárolók az adminisztrációs feladatokhoz
@@ -45,7 +49,12 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   @ViewChild('statsContainer', { static: false }) statsContainer?: ElementRef;
 
-  constructor(private firebaseService: FirebaseService) {}
+  constructor(
+    private firebaseService: FirebaseService,
+    private appointmentService: AppointmentService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     // Kezdeti adatok betöltése
@@ -247,6 +256,155 @@ export class AdminComponent implements OnInit, AfterViewInit {
       .catch((error) => {
         console.error('Hiba a foglalás állapotának frissítésekor:', error);
       });
+  }
+
+  /**
+   * Időpontfoglalás szerkesztése
+   * @param appointment A szerkesztendő időpont
+   */
+  editAppointment(appointment: Appointment): void {
+    // Megnyitjuk a szerkesztő dialógust
+    const dialogRef = this.dialog.open(AdminAppointmentEditDialogComponent, {
+      width: '550px',
+      data: {
+        appointment: { ...appointment },
+        services: this.services,
+        locations: this.locations,
+        users: this.users.map((user) => ({ id: user.id, name: user.name })),
+      },
+    });
+
+    // Figyeljük az eredményt
+    dialogRef
+      .afterClosed()
+      .subscribe((updatedAppointment: Partial<Appointment> | undefined) => {
+        if (updatedAppointment && updatedAppointment.id) {
+          // Ha van eredmény, frissítjük az időpontot
+          this.appointmentService
+            .updateAppointment(
+              updatedAppointment as Partial<Appointment> & {
+                id: string | number;
+              }
+            )
+            .then(() => {
+              // Sikeres frissítés esetén értesítjük a felhasználót
+              this.snackBar.open('Időpont sikeresen frissítve!', 'Bezár', {
+                duration: 3000,
+              });
+
+              // Frissítjük a megjelenített adatokat
+              this.refreshCurrentView();
+            })
+            .catch((error) => {
+              console.error('Hiba az időpont frissítésekor:', error);
+              this.snackBar.open(
+                'Hiba történt az időpont frissítésekor!',
+                'Bezár',
+                {
+                  duration: 3000,
+                }
+              );
+            });
+        }
+      });
+  }
+
+  /**
+   * Új időpontfoglalás létrehozása
+   */
+  createNewAppointment(): void {
+    // Létrehozunk egy üres időpontot
+    const newAppointment: Partial<Appointment> = {
+      status: 'pending',
+      date: new Date().toISOString().split('T')[0],
+      time: '08:00',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      userId: this.users.length > 0 ? this.users[0].id! : '',
+      serviceId: this.services.length > 0 ? this.services[0].id : '',
+      locationId: this.locations.length > 0 ? this.locations[0].id : '',
+    };
+
+    // Megnyitjuk a szerkesztő dialógust
+    const dialogRef = this.dialog.open(AdminAppointmentEditDialogComponent, {
+      width: '550px',
+      data: {
+        appointment: newAppointment,
+        services: this.services,
+        locations: this.locations,
+        users: this.users.map((user) => ({ id: user.id, name: user.name })),
+      },
+    });
+
+    // Figyeljük az eredményt
+    dialogRef
+      .afterClosed()
+      .subscribe((appointmentData: Partial<Appointment> | undefined) => {
+        if (
+          appointmentData &&
+          appointmentData.userId &&
+          appointmentData.serviceId &&
+          appointmentData.date &&
+          appointmentData.time
+        ) {
+          // Létrehozzuk az új időpontot
+          const newAppointmentData = {
+            userId: appointmentData.userId,
+            serviceId: appointmentData.serviceId,
+            locationId: appointmentData.locationId || 'budapest1',
+            date: appointmentData.date,
+            time: appointmentData.time,
+            status: appointmentData.status || 'pending',
+            notes: appointmentData.notes || '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+
+          // Mentjük az adatbázisba
+          this.firebaseService
+            .addAppointment(newAppointmentData)
+            .then(() => {
+              // Sikeres mentés esetén értesítjük a felhasználót
+              this.snackBar.open(
+                'Új időpontfoglalás sikeresen létrehozva!',
+                'Bezár',
+                {
+                  duration: 3000,
+                }
+              );
+
+              // Frissítjük a megjelenített adatokat
+              this.refreshCurrentView();
+            })
+            .catch((error) => {
+              console.error('Hiba az új időpont létrehozásakor:', error);
+              this.snackBar.open(
+                'Hiba történt az új időpont létrehozásakor!',
+                'Bezár',
+                {
+                  duration: 3000,
+                }
+              );
+            });
+        }
+      });
+  }
+
+  /**
+   * Az aktuális nézet frissítése
+   */
+  refreshCurrentView(): void {
+    if (this.activeView === 'today') {
+      this.loadTodaysAppointments();
+    } else if (this.activeView === 'active') {
+      this.loadActiveAppointments();
+    } else if (this.activeView === 'past') {
+      this.loadPastAppointments();
+    } else if (this.activeView === 'dateRange') {
+      this.searchAppointmentsByDateRange();
+    } else if (this.activeView === 'statistics') {
+      this.loadAppointmentStatistics();
+    }
   }
 
   // Nézet váltás kezelése

@@ -101,4 +101,109 @@ export class AppointmentService {
       throw error;
     }
   }
+
+  /**
+   * Időpontfoglalás frissítése
+   * @param appointment A frissítendő időpont adatai
+   * @returns Promise void
+   */
+  async updateAppointment(
+    appointment: Partial<Appointment> & { id: string | number }
+  ): Promise<void> {
+    try {
+      // Ellenőrizzük, hogy van-e ID
+      if (!appointment.id) {
+        throw new Error('Appointment ID is required for update');
+      }
+
+      // Mentsük el az updatedAt időpontot
+      const updatedData = {
+        ...appointment,
+        updatedAt: new Date(),
+      };
+
+      // Ha Firebase ID-val rendelkezik (string típusú)
+      if (typeof appointment.id === 'string') {
+        // Frissítsük a Firebase-ben
+        await this.firebaseService.updateAppointment(
+          appointment.id,
+          updatedData
+        );
+      }
+
+      // Frissítsük az IndexedDB-ben is (akkor is, ha string ID, offline támogatáshoz)
+      // Ha az ID szám, akkor csak helyi foglalás, nincs Firebase-ben
+      try {
+        // Ha az ID szám, akkor már van egy helyi másolatunk
+        if (typeof appointment.id === 'number') {
+          // Lekérjük az eredeti foglalást
+          const appointments = await this.indexedDB.getAllAppointments();
+          const existingAppointment = appointments.find(
+            (a) => a.id === appointment.id
+          );
+
+          if (existingAppointment) {
+            // Frissítsük a meglévő foglalást a módosított adatokkal
+            const updatedAppointment = {
+              ...existingAppointment,
+              ...updatedData,
+            };
+            await this.indexedDB.updateAppointment(updatedAppointment);
+          }
+        }
+        // Ha string ID (Firebase), akkor is frissítsük helyben
+        else {
+          const appointments = await this.indexedDB.getAllAppointments();
+          const existingAppointment = appointments.find(
+            (a) => a.id === appointment.id
+          );
+
+          if (existingAppointment) {
+            // Frissítsük a meglévő helyi másolatot
+            const updatedAppointment = {
+              ...existingAppointment,
+              ...updatedData,
+            };
+            await this.indexedDB.updateAppointment(updatedAppointment);
+          } else {
+            // Ha nincs helyi másolat, akkor hibát dobunk
+            console.warn(
+              'Appointment not found in IndexedDB, cannot update locally'
+            );
+          }
+        }
+      } catch (error) {
+        console.warn('Error updating appointment in IndexedDB:', error);
+        // Nem dobunk hibát, ha a lokális frissítés nem sikerül, csak naplózzuk
+      }
+    } catch (error) {
+      console.error('Error updating appointment:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Időpontfoglalás státuszának frissítése
+   * @param id Az időpont azonosítója
+   * @param status Az új státusz
+   * @returns Promise void
+   */
+  async updateAppointmentStatus(
+    id: string | number,
+    status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
+  ): Promise<void> {
+    try {
+      // A teljes frissítő metódust hívjuk meg, csak a státuszt frissítve
+      await this.updateAppointment({
+        // Explicit típuskonverziót végzünk, hogy megfeleljen az Appointment interfésznek
+        // Ez biztonságos, mert a rendszer belül helyesen fogja kezelni mind a string,
+        // mind a number típusú azonosítókat
+        id: id as unknown as string,
+        status,
+      });
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+      throw error;
+    }
+  }
 }

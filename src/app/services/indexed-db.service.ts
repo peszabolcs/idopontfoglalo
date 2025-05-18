@@ -149,6 +149,31 @@ export class IndexedDBService {
     });
   }
 
+  async updateAppointment(appointment: Appointment): Promise<void> {
+    await this.ensureDBInitialized();
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject('Database not initialized');
+        return;
+      }
+
+      const transaction = this.db.transaction(
+        [this.appointmentStoreName],
+        'readwrite'
+      );
+      const store = transaction.objectStore(this.appointmentStoreName);
+      const request = store.put(appointment);
+
+      request.onsuccess = () => {
+        resolve();
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  }
+
   // User methods
   async addUser(user: User): Promise<number> {
     await this.ensureDBInitialized();

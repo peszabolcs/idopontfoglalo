@@ -272,6 +272,39 @@
     background-color: #e9ecef;
     border: 1px solid #ced4da;
   }
+
+  .admin-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .action-buttons {
+    margin-left: 15px;
+  }
+
+  .create-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .mr-1 {
+    margin-right: 5px;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
 }
 
 @media (max-width: 768px) {

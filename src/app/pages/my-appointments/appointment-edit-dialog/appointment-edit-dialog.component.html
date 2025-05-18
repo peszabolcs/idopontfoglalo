@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>Időpont módosítása</h2>
+<mat-dialog-content>
+  <form [formGroup]="editForm" class="edit-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Szolgáltatás</mat-label>
+      <mat-select formControlName="serviceId" required>
+        <mat-option *ngFor="let service of services" [value]="service.value">
+          {{ service.viewValue }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Dátum</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        formControlName="date"
+        [min]="minDate"
+        placeholder="Válasszon dátumot"
+        required
+      />
+      <mat-hint>Csak jövőbeli dátumok választhatók</mat-hint>
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="picker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Időpont</mat-label>
+      <mat-select formControlName="time" required>
+        <mat-option *ngFor="let time of availableTimes" [value]="time">
+          {{ time }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Megjegyzések</mat-label>
+      <textarea
+        matInput
+        formControlName="notes"
+        placeholder="Opcionális megjegyzések"
+        rows="3"
+      ></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Mégsem</button>
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="!editForm.valid"
+    (click)="onSave()"
+  >
+    Módosítás mentése
+  </button>
+</mat-dialog-actions>

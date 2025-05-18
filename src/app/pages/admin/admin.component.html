@@ -34,6 +34,16 @@
         Statisztikák
       </button>
     </div>
+
+    <!-- Új időpont létrehozása gomb -->
+    <div class="action-buttons">
+      <button
+        class="btn btn-success create-btn"
+        (click)="createNewAppointment()"
+      >
+        <i class="fas fa-plus-circle"></i> Új időpont létrehozása
+      </button>
+    </div>
   </div>
 
   <!-- Dátum intervallum keresés -->
@@ -84,6 +94,12 @@
                 }}</span>
               </td>
               <td class="actions">
+                <button
+                  class="btn btn-sm btn-primary mr-1"
+                  (click)="editAppointment(appointment)"
+                >
+                  <i class="fas fa-edit"></i> Szerkesztés
+                </button>
                 <button
                   class="btn btn-sm btn-success"
                   *ngIf="appointment.status === 'pending'"
@@ -153,6 +169,12 @@
                 }}</span>
               </td>
               <td class="actions">
+                <button
+                  class="btn btn-sm btn-primary mr-1"
+                  (click)="editAppointment(appointment)"
+                >
+                  <i class="fas fa-edit"></i> Szerkesztés
+                </button>
                 <button
                   class="btn btn-sm btn-success"
                   *ngIf="appointment.status === 'pending'"
@@ -259,6 +281,12 @@
                 }}</span>
               </td>
               <td class="actions">
+                <button
+                  class="btn btn-sm btn-primary mr-1"
+                  (click)="editAppointment(appointment)"
+                >
+                  <i class="fas fa-edit"></i> Szerkesztés
+                </button>
                 <button
                   class="btn btn-sm btn-success"
                   *ngIf="appointment.status === 'pending'"

@@ -4,7 +4,9 @@ import { FirebaseService } from '../../services/firebase.service';
 import { UserService } from '../../services/user.service';
 import { Appointment } from '../../models';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AppointmentListComponent } from './appointment-list/appointment-list.component';
+import { AppointmentEditDialogComponent } from './appointment-edit-dialog/appointment-edit-dialog.component';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 
@@ -13,7 +15,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './my-appointments.component.html',
   styleUrls: ['./my-appointments.component.scss'],
   standalone: true,
-  imports: [CommonModule, AppointmentListComponent],
+  imports: [CommonModule, AppointmentListComponent, MatDialogModule],
 })
 export class MyAppointmentsComponent implements OnInit, OnDestroy {
   allAppointments: Appointment[] = [];
@@ -27,7 +29,8 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
     private appointmentService: AppointmentService,
     private firebaseService: FirebaseService,
     private userService: UserService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -119,8 +122,58 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
       console.error('Appointment ID is undefined');
       return;
     }
-    // TODO: Implement appointment modification
-    console.log('Appointment modified:', appointmentId);
+
+    // Keressük meg a módosítandó időpontot
+    const appointmentToEdit = this.allAppointments.find(
+      (app) => app.id === appointmentId
+    );
+
+    if (!appointmentToEdit) {
+      console.error('Appointment not found with ID:', appointmentId);
+      return;
+    }
+
+    // Megnyitjuk a dialógusablakot az időpont adataival
+    const dialogRef = this.dialog.open(AppointmentEditDialogComponent, {
+      width: '450px', // Szélesebb dialógus a formhoz
+      data: { appointment: appointmentToEdit },
+    });
+
+    dialogRef
+      .afterClosed()
+      .subscribe((updatedAppointment: Partial<Appointment> | undefined) => {
+        if (updatedAppointment && updatedAppointment.id) {
+          // Ha a felhasználó elmentette a módosításokat, frissítjük az időpontot
+          this.isLoading = true;
+
+          // Használjuk az AppointmentService-t a frissítéshez
+          this.appointmentService
+            .updateAppointment(
+              updatedAppointment as Partial<Appointment> & {
+                id: string | number;
+              }
+            )
+            .then(() => {
+              this.snackBar.open('Időpont sikeresen módosítva!', 'Bezár', {
+                duration: 3000,
+              });
+              this.loadAppointments(); // Újratöltjük az időpontokat
+            })
+            .catch((error) => {
+              console.error('Error updating appointment:', error);
+              this.snackBar.open(
+                'Hiba történt az időpont módosítása során',
+                'Bezár',
+                {
+                  duration: 3000,
+                }
+              );
+            })
+            .finally(() => {
+              this.isLoading = false;
+            });
+        }
+      });
   }
 
   onAppointmentCancelled(appointmentId: string | undefined): void {

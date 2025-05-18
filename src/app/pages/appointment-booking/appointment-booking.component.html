@@ -51,14 +51,18 @@
 
       <mat-form-field appearance="outline" class="form-field">
         <mat-label>Időpont</mat-label>
-        <input matInput type="time" formControlName="time" />
+        <mat-select formControlName="time">
+          <mat-option *ngFor="let time of availableTimes" [value]="time">
+            {{ time }}
+          </mat-option>
+        </mat-select>
         <mat-error
           *ngIf="
             appointmentForm.get('time')?.invalid &&
             appointmentForm.get('time')?.touched
           "
         >
-          Az időpont megadása kötelező
+          Az időpont kiválasztása kötelező
         </mat-error>
       </mat-form-field>
 
