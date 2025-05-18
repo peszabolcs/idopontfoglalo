@@ -91,21 +91,19 @@ export class ServiceManagementComponent implements OnInit {
     this.currentServiceId = service?.id || null;
   }
 
-  loadServices(): void {
+  async loadServices(): Promise<void> {
     this.isLoading = true;
-    this.serviceService.getServices().subscribe({
-      next: (services) => {
-        this.services = services;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Hiba a szolgáltatások betöltésekor:', error);
-        this.showErrorMessage(
-          'Nem sikerült betölteni a szolgáltatásokat. Kérjük, próbálja újra később!'
-        );
-        this.isLoading = false;
-      },
-    });
+    try {
+      const services = await this.serviceService.getAllServices();
+      this.services = services;
+      this.isLoading = false;
+    } catch (error) {
+      console.error('Hiba a szolgáltatások betöltésekor:', error);
+      this.showErrorMessage(
+        'Nem sikerült betölteni a szolgáltatásokat. Kérjük, próbálja újra később!'
+      );
+      this.isLoading = false;
+    }
   }
 
   onSubmit(): void {
@@ -120,8 +118,8 @@ export class ServiceManagementComponent implements OnInit {
         ? this.serviceService.updateService(serviceData)
         : this.serviceService.addService(serviceData);
 
-      operation.subscribe({
-        next: () => {
+      operation
+        .then(() => {
           this.isSubmitting = false;
           this.showSuccessMessage(
             this.isEditMode
@@ -130,15 +128,14 @@ export class ServiceManagementComponent implements OnInit {
           );
           this.resetForm();
           this.loadServices();
-        },
-        error: (error) => {
+        })
+        .catch((error) => {
           console.error('Hiba a szolgáltatás mentésekor:', error);
           this.isSubmitting = false;
           this.showErrorMessage(
             'Nem sikerült menteni a szolgáltatást. Kérjük, próbálja újra később!'
           );
-        },
-      });
+        });
     } else {
       this.markFormGroupTouched(this.serviceForm);
     }
@@ -152,21 +149,21 @@ export class ServiceManagementComponent implements OnInit {
 
   deleteService(serviceId: string): void {
     if (confirm('Biztosan törölni szeretné ezt a szolgáltatást?')) {
-      this.serviceService.deleteService(serviceId).subscribe({
-        next: () => {
+      this.serviceService
+        .deleteService(Number(serviceId))
+        .then(() => {
           this.showSuccessMessage('A szolgáltatás sikeresen törölve!');
           this.loadServices();
           if (this.currentServiceId === serviceId) {
             this.resetForm();
           }
-        },
-        error: (error) => {
+        })
+        .catch((error) => {
           console.error('Hiba a szolgáltatás törlésekor:', error);
           this.showErrorMessage(
             'Nem sikerült törölni a szolgáltatást. Kérjük, próbálja újra később!'
           );
-        },
-      });
+        });
     }
   }
 
@@ -176,22 +173,32 @@ export class ServiceManagementComponent implements OnInit {
       isActive: !service.isActive,
     };
 
-    this.serviceService.updateService(updatedService).subscribe({
-      next: () => {
+    interface UpdateServiceResponse {
+      // Define properties based on the actual response structure if known
+    }
+
+    interface UpdateServiceError {
+      // Define properties based on the actual error structure if known
+      message?: string;
+      [key: string]: any;
+    }
+
+    this.serviceService
+      .updateService(updatedService)
+      .then(() => {
         this.showSuccessMessage(
           updatedService.isActive
             ? 'A szolgáltatás aktiválva!'
             : 'A szolgáltatás deaktiválva!'
         );
         this.loadServices();
-      },
-      error: (error) => {
+      })
+      .catch((error: any) => {
         console.error('Hiba a szolgáltatás státuszának módosításakor:', error);
         this.showErrorMessage(
           'Nem sikerült módosítani a szolgáltatás státuszát. Kérjük, próbálja újra később!'
         );
-      },
-    });
+      });
   }
 
   resetForm(): void {

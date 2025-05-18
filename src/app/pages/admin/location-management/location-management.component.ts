@@ -115,7 +115,7 @@ export class LocationManagementComponent implements OnInit {
   }
 
   loadLocations(): void {
-    this.locationService.getLocations().subscribe((locations) => {
+    this.locationService.getAllLocations().subscribe((locations) => {
       this.locations = locations;
     });
   }
@@ -135,38 +135,40 @@ export class LocationManagementComponent implements OnInit {
           ...locationData,
           id: this.currentLocationId,
         })
-        .then(() => {
-          this.snackBar.open('Helyszín sikeresen frissítve!', 'Bezár', {
-            duration: 3000,
-          });
-          this.resetForm();
-        })
-        .catch((error) => {
-          this.snackBar.open(`Hiba történt: ${error.message}`, 'Bezár', {
-            duration: 5000,
-          });
+        .subscribe({
+          next: () => {
+            this.snackBar.open('Helyszín sikeresen frissítve!', 'Bezár', {
+              duration: 3000,
+            });
+            this.resetForm();
+          },
+          error: (error) => {
+            this.snackBar.open(`Hiba történt: ${error.message}`, 'Bezár', {
+              duration: 5000,
+            });
+          },
         });
     } else {
       // Create new location
-      this.locationService
-        .addLocation(locationData)
-        .then(() => {
+      this.locationService.addLocation(locationData).subscribe({
+        next: () => {
           this.snackBar.open('Helyszín sikeresen hozzáadva!', 'Bezár', {
             duration: 3000,
           });
           this.resetForm();
-        })
-        .catch((error) => {
+        },
+        error: (error) => {
           this.snackBar.open(`Hiba történt: ${error.message}`, 'Bezár', {
             duration: 5000,
           });
-        });
+        },
+      });
     }
   }
 
   prepareLocationData(): Omit<Location, 'id'> {
     const formValue = this.locationForm.value;
-    const openingHours = {};
+    const openingHours: Record<string, any> = {};
 
     this.days.forEach((day, index) => {
       openingHours[day] = formValue.openingHours[index];
@@ -203,7 +205,6 @@ export class LocationManagementComponent implements OnInit {
       const dayOpeningHours = location.openingHours[day];
       if (dayOpeningHours) {
         (this.openingHoursArray.at(index) as FormGroup).patchValue({
-          isOpen: dayOpeningHours.isOpen,
           open: dayOpeningHours.open,
           close: dayOpeningHours.close,
         });
@@ -232,9 +233,8 @@ export class LocationManagementComponent implements OnInit {
     if (
       confirm(`Biztosan törölni szeretné ezt a helyszínt: ${location.name}?`)
     ) {
-      this.locationService
-        .deleteLocation(location.id)
-        .then(() => {
+      this.locationService.deleteLocation(location.id).subscribe({
+        next: () => {
           this.snackBar.open('Helyszín sikeresen törölve!', 'Bezár', {
             duration: 3000,
           });
@@ -242,31 +242,34 @@ export class LocationManagementComponent implements OnInit {
           if (this.currentLocationId === location.id) {
             this.resetForm();
           }
-        })
-        .catch((error) => {
+        },
+        error: (error) => {
           this.snackBar.open(`Hiba történt: ${error.message}`, 'Bezár', {
             duration: 5000,
           });
-        });
+        },
+      });
     }
   }
 
   toggleLocationStatus(location: Location): void {
     const updatedLocation = { ...location, isActive: !location.isActive };
 
-    this.locationService
-      .updateLocation(updatedLocation)
-      .then(() => {
-        const status = updatedLocation.isActive ? 'aktiválva' : 'deaktiválva';
+    this.locationService.updateLocation(updatedLocation as Location).subscribe({
+      next: () => {
+        const status: string = updatedLocation.isActive
+          ? 'aktiválva'
+          : 'deaktiválva';
         this.snackBar.open(`Helyszín sikeresen ${status}!`, 'Bezár', {
           duration: 3000,
         });
-      })
-      .catch((error) => {
+      },
+      error: (error: { message: string }) => {
         this.snackBar.open(`Hiba történt: ${error.message}`, 'Bezár', {
           duration: 5000,
         });
-      });
+      },
+    });
   }
 
   // Form validation helpers
