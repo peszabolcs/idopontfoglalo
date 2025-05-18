@@ -9,12 +9,55 @@
   </mat-card-header>
   <mat-card-content>
     <p><strong>Helyszín:</strong> {{ appointment.locationId }}</p>
-    <p>
-      <strong>Státusz:</strong>
-      <mat-chip [color]="getStatusColor(appointment.status)" selected>
-        {{ appointment.status | statusTranslate }}
-      </mat-chip>
-    </p>
+
+    <!-- Státusz megjelenítése ngSwitch direktívával -->
+    <p><strong>Státusz:</strong></p>
+    <div [ngSwitch]="appointment.status">
+      <div *ngSwitchCase="'pending'">
+        <mat-chip color="accent" selected>
+          {{ "pending" | statusTranslate }}
+          <mat-icon>hourglass_empty</mat-icon>
+        </mat-chip>
+        <p class="status-description">
+          Az időpontja függőben van, várja az adminisztrátori jóváhagyást.
+        </p>
+      </div>
+
+      <div *ngSwitchCase="'confirmed'">
+        <mat-chip color="primary" selected>
+          {{ "confirmed" | statusTranslate }}
+          <mat-icon>check_circle</mat-icon>
+        </mat-chip>
+        <p class="status-description">
+          Az időpontja visszaigazolva, kérjük, jelenjen meg a megadott időben.
+        </p>
+      </div>
+
+      <div *ngSwitchCase="'cancelled'">
+        <mat-chip color="warn" selected>
+          {{ "cancelled" | statusTranslate }}
+          <mat-icon>cancel</mat-icon>
+        </mat-chip>
+        <p class="status-description">Az időpont lemondásra került.</p>
+      </div>
+
+      <div *ngSwitchCase="'completed'">
+        <mat-chip color="primary" selected>
+          {{ "completed" | statusTranslate }}
+          <mat-icon>done_all</mat-icon>
+        </mat-chip>
+        <p class="status-description">
+          Az időpontja sikeresen teljesítve lett.
+        </p>
+      </div>
+
+      <div *ngSwitchDefault>
+        <mat-chip>
+          {{ appointment.status | statusTranslate }}
+        </mat-chip>
+      </div>
+    </div>
+
     <p *ngIf="appointment.notes">
       <strong>Megjegyzés:</strong> {{ appointment.notes }}
     </p>
@@ -33,3 +76,11 @@
     </button>
   </mat-card-actions>
 </mat-card>
+
+<style>
+  .status-description {
+    font-size: 0.9em;
+    margin-top: 4px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+</style>

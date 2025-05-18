@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AppointmentService } from '../../services/appointment.service';
 import { FirebaseService } from '../../services/firebase.service';
 import { UserService } from '../../services/user.service';
@@ -8,7 +8,14 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AppointmentListComponent } from './appointment-list/appointment-list.component';
 import { AppointmentEditDialogComponent } from './appointment-edit-dialog/appointment-edit-dialog.component';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  Subscription,
+  combineLatest,
+  map,
+  switchMap,
+} from 'rxjs';
 
 @Component({
   selector: 'app-my-appointments',
@@ -18,10 +25,19 @@ import { Subscription } from 'rxjs';
   imports: [CommonModule, AppointmentListComponent, MatDialogModule],
 })
 export class MyAppointmentsComponent implements OnInit, OnDestroy {
-  allAppointments: Appointment[] = [];
-  filteredAppointments: Appointment[] = [];
-  showPastAppointments = false;
+  // BehaviorSubject to track the past/active toggle state
+  private showPastAppointmentsSubject = new BehaviorSubject<boolean>(false);
+
+  // Observable for the filtered appointments using the async pipe
+  filteredAppointments$: Observable<Appointment[]> | null = null;
+
+  // Property to easily access the current state in the template
+  get showPastAppointments(): boolean {
+    return this.showPastAppointmentsSubject.getValue();
+  }
+
   isLoading = true;
+  allAppointments: Appointment[] = [];
   currentUserId: string | null = null;
   private userSubscription?: Subscription;
   private appointmentsSubscription?: Subscription;
@@ -29,7 +45,7 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
   constructor(
     private appointmentService: AppointmentService,
     private firebaseService: FirebaseService,
-    private userService: UserService,
+    public userService: UserService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog
   ) {}
@@ -38,11 +54,10 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
     this.userSubscription = this.userService.currentUser$.subscribe((user) => {
       if (user) {
         this.currentUserId = user.id ?? null;
-        this.loadAppointments();
+        this.setupRealTimeAppointments();
       } else {
         this.currentUserId = null;
         this.allAppointments = [];
-        this.filteredAppointments = [];
       }
     });
   }
@@ -54,51 +69,52 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
     if (this.appointmentsSubscription) {
       this.appointmentsSubscription.unsubscribe();
     }
+    // Ensure to complete BehaviorSubject
+    this.showPastAppointmentsSubject.complete();
   }
 
-  loadAppointments(): void {
-    this.isLoading = true;
-
+  // Setup real-time appointments with async pipe support
+  setupRealTimeAppointments(): void {
     if (!this.currentUserId) {
       this.isLoading = false;
       return;
     }
 
-    // Valós idejű frissítéseket használunk a Firebase-ből
-    if (this.appointmentsSubscription) {
-      this.appointmentsSubscription.unsubscribe();
-    }
+    // Create an observable for appointments using switchMap for proper chaining
+    const appointments$ = this.userService.currentUser$.pipe(
+      switchMap((user) => {
+        if (!user || !user.id) {
+          return new Observable<Appointment[]>((observer) => observer.next([]));
+        }
+        this.isLoading = true;
+        return this.firebaseService.getUserAppointmentsRealtime(user.id);
+      })
+    );
 
-    this.appointmentsSubscription = this.firebaseService
-      .getUserAppointmentsRealtime(this.currentUserId)
-      .subscribe({
-        next: (appointments: Appointment[]) => {
-          console.log('Új foglalások betöltve:', appointments.length);
-          this.allAppointments = appointments;
-          this.filterAppointments();
-          this.isLoading = false;
-        },
-        error: (error: any) => {
-          console.error('Error loading appointments:', error);
-          this.snackBar.open(
-            'Hiba történt az időpontok betöltése során',
-            'Bezár',
-            {
-              duration: 3000,
-            }
-          );
-          this.isLoading = false;
-        },
-      });
+    // Combine the appointments stream with the toggle state
+    this.filteredAppointments$ = combineLatest([
+      appointments$,
+      this.showPastAppointmentsSubject,
+    ]).pipe(
+      map(([appointments, showPast]) => {
+        this.isLoading = false;
+        this.allAppointments = appointments;
+        return this.filterAppointmentsByState(appointments, showPast);
+      })
+    );
   }
 
-  filterAppointments(): void {
+  // Helper method for filtering appointments
+  private filterAppointmentsByState(
+    appointments: Appointment[],
+    showPast: boolean
+  ): Appointment[] {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (this.showPastAppointments) {
+    if (showPast) {
       // Szűrés a múltbeli foglalásokra vagy a "completed/cancelled" státuszúakra
-      this.filteredAppointments = this.allAppointments.filter((appointment) => {
+      return appointments.filter((appointment) => {
         const appointmentDate = new Date(appointment.date);
         appointmentDate.setHours(0, 0, 0, 0);
 
@@ -110,7 +126,7 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
       });
     } else {
       // Szűrés az aktív foglalásokra (jövőbeli vagy "pending/confirmed" státuszúak)
-      this.filteredAppointments = this.allAppointments.filter((appointment) => {
+      return appointments.filter((appointment) => {
         const appointmentDate = new Date(appointment.date);
         appointmentDate.setHours(0, 0, 0, 0);
 
@@ -124,8 +140,7 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
   }
 
   toggleAppointments(showPast: boolean): void {
-    this.showPastAppointments = showPast;
-    this.filterAppointments();
+    this.showPastAppointmentsSubject.next(showPast);
   }
 
   onAppointmentModified(appointmentId: string | undefined): void {
@@ -168,7 +183,6 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
               this.snackBar.open('Időpont sikeresen módosítva!', 'Bezár', {
                 duration: 3000,
               });
-              this.loadAppointments(); // Újratöltjük az időpontokat
             })
             .catch((error) => {
               console.error('Error updating appointment:', error);
@@ -201,7 +215,6 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
       .updateAppointmentStatus(id, 'cancelled')
       .then(() => {
         // Újratöltjük az időpontokat
-        this.loadAppointments();
         this.snackBar.open('Időpont sikeresen lemondva', 'Bezár', {
           duration: 3000,
         });

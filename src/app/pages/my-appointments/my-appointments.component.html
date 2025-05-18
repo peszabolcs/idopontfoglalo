@@ -23,11 +23,24 @@
     <p>Időpontok betöltése...</p>
   </div>
 
-  <app-appointment-list
-    *ngIf="!isLoading"
-    [appointments]="filteredAppointments"
-    [showPastAppointments]="showPastAppointments"
-    (appointmentModified)="onAppointmentModified($event)"
-    (appointmentCancelled)="onAppointmentCancelled($event)"
-  ></app-appointment-list>
+  <!-- Használjuk az async pipe-ot a filteredAppointments$ Observable-re -->
+  <ng-container *ngIf="filteredAppointments$ | async as appointments">
+    <app-appointment-list
+      [appointments]="appointments"
+      [showPastAppointments]="showPastAppointments"
+      (appointmentModified)="onAppointmentModified($event)"
+      (appointmentCancelled)="onAppointmentCancelled($event)"
+    ></app-appointment-list>
+  </ng-container>
+
+  <!-- Ha nincsenek időpontok, azt is kezeljük -->
+  <div
+    *ngIf="(filteredAppointments$ | async)?.length === 0 && !isLoading"
+    class="no-appointments"
+  >
+    <p>Nincsenek megjelenítendő foglalások.</p>
+    <button mat-raised-button color="primary" routerLink="/idopontfoglalas">
+      Új időpont foglalása
+    </button>
+  </div>
 </div>
