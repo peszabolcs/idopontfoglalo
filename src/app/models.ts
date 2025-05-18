@@ -3,9 +3,12 @@ export interface User {
   email: string;
   password: string;
   name: string;
+  phone?: string;
   isAdmin: boolean;
   createdAt: Date;
   lastLogin?: Date;
+  emailNotifications?: boolean;
+  smsNotifications?: boolean;
 }
 
 export interface Service {

@@ -6,6 +6,7 @@ import { AdminComponent } from './pages/admin/admin.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 import { AuthGuard } from './guards/auth.guard';
 import { AdminGuard } from './guards/admin.guard';
 
@@ -19,6 +20,11 @@ export const routes: Routes = [
   {
     path: 'foglalasaim',
     component: MyAppointmentsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'profil',
+    component: ProfileComponent,
     canActivate: [AuthGuard],
   },
   { path: 'admin', component: AdminComponent, canActivate: [AdminGuard] },

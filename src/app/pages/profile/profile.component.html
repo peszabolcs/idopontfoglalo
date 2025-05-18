@@ -1,0 +1,206 @@
+<div class="profile-container">
+  <mat-card class="profile-card">
+    <mat-card-header>
+      <mat-card-title>
+        <h1>Felhasználói profil</h1>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <ng-container
+        *ngIf="userService.currentUser$ | async as user; else loading"
+      >
+        <div class="profile-info">
+          <div class="profile-avatar">
+            <div class="avatar-circle">
+              <span class="initials">{{ getUserInitials(user) }}</span>
+            </div>
+          </div>
+
+          <div class="profile-details">
+            <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Név</mat-label>
+                  <input
+                    matInput
+                    formControlName="name"
+                    placeholder="Teljes név"
+                  />
+                  <mat-error
+                    *ngIf="profileForm.get('name')?.hasError('required')"
+                  >
+                    A név megadása kötelező
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Email</mat-label>
+                  <input
+                    matInput
+                    formControlName="email"
+                    placeholder="Email cím"
+                    readonly
+                  />
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Telefonszám</mat-label>
+                  <input
+                    matInput
+                    formControlName="phone"
+                    placeholder="Telefonszám"
+                  />
+                  <mat-error
+                    *ngIf="profileForm.get('phone')?.hasError('pattern')"
+                  >
+                    Érvénytelen telefonszám formátum
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="preference-row">
+                <span>Email értesítések</span>
+                <mat-slide-toggle
+                  formControlName="emailNotifications"
+                  color="primary"
+                >
+                  {{
+                    profileForm.get("emailNotifications")?.value
+                      ? "Bekapcsolva"
+                      : "Kikapcsolva"
+                  }}
+                </mat-slide-toggle>
+              </div>
+
+              <div class="preference-row">
+                <span>SMS értesítések</span>
+                <mat-slide-toggle
+                  formControlName="smsNotifications"
+                  color="primary"
+                >
+                  {{
+                    profileForm.get("smsNotifications")?.value
+                      ? "Bekapcsolva"
+                      : "Kikapcsolva"
+                  }}
+                </mat-slide-toggle>
+              </div>
+
+              <div class="actions">
+                <button
+                  type="submit"
+                  mat-raised-button
+                  color="primary"
+                  [disabled]="profileForm.invalid || !profileForm.dirty"
+                >
+                  Mentés
+                </button>
+                <button type="button" mat-button (click)="resetForm()">
+                  Visszaállítás
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <mat-divider class="section-divider"></mat-divider>
+
+        <div class="profile-security">
+          <h2>Jelszó módosítása</h2>
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Jelenlegi jelszó</mat-label>
+                <input
+                  matInput
+                  type="password"
+                  formControlName="currentPassword"
+                  placeholder="Jelenlegi jelszó"
+                />
+                <mat-error
+                  *ngIf="
+                    passwordForm.get('currentPassword')?.hasError('required')
+                  "
+                >
+                  A jelenlegi jelszó megadása kötelező
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Új jelszó</mat-label>
+                <input
+                  matInput
+                  type="password"
+                  formControlName="newPassword"
+                  placeholder="Új jelszó"
+                />
+                <mat-error
+                  *ngIf="passwordForm.get('newPassword')?.hasError('required')"
+                >
+                  Az új jelszó megadása kötelező
+                </mat-error>
+                <mat-error
+                  *ngIf="passwordForm.get('newPassword')?.hasError('minlength')"
+                >
+                  A jelszónak legalább 6 karakter hosszúnak kell lennie
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Új jelszó megerősítése</mat-label>
+                <input
+                  matInput
+                  type="password"
+                  formControlName="confirmPassword"
+                  placeholder="Új jelszó megerősítése"
+                />
+                <mat-error
+                  *ngIf="
+                    passwordForm.get('confirmPassword')?.hasError('required')
+                  "
+                >
+                  Az új jelszó megerősítése kötelező
+                </mat-error>
+                <mat-error
+                  *ngIf="
+                    passwordForm
+                      .get('confirmPassword')
+                      ?.hasError('passwordMismatch')
+                  "
+                >
+                  A jelszavak nem egyeznek
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="actions">
+              <button
+                type="submit"
+                mat-raised-button
+                color="primary"
+                [disabled]="passwordForm.invalid"
+              >
+                Jelszó módosítása
+              </button>
+            </div>
+          </form>
+        </div>
+      </ng-container>
+
+      <ng-template #loading>
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Profil betöltése...</p>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+</div>
