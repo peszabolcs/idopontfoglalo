@@ -1,0 +1,26 @@
+<div class="faq-container">
+  <h2>Gyakori kérdések</h2>
+
+  <mat-accordion class="faq-accordion">
+    <mat-expansion-panel *ngFor="let faq of faqs; let i = index">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{ faq.question }}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <p>{{ faq.answer }}</p>
+
+      <mat-action-row>
+        <button
+          mat-button
+          color="primary"
+          *ngIf="i < faqs.length - 1"
+          (click)="$event.stopPropagation()"
+        >
+          <mat-icon>contact_support</mat-icon> További segítség
+        </button>
+      </mat-action-row>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

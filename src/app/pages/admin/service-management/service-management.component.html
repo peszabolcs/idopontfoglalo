@@ -1,1 +1,186 @@
-<p>service-management works!</p>
+<div class="service-management-container">
+  <h1>Szolgáltatások kezelése</h1>
+
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>{{
+        isEditMode ? "Szolgáltatás szerkesztése" : "Új szolgáltatás hozzáadása"
+      }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form
+        [formGroup]="serviceForm"
+        (ngSubmit)="onSubmit()"
+        class="service-form"
+      >
+        <mat-form-field appearance="outline">
+          <mat-label>Név</mat-label>
+          <input
+            matInput
+            formControlName="name"
+            placeholder="Pl. Személyi igazolvány ügyintézés"
+          />
+          <mat-error *ngIf="serviceForm.get('name')?.invalid">{{
+            getErrorMessage("name")
+          }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Leírás</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            placeholder="A szolgáltatás részletes leírása..."
+          ></textarea>
+          <mat-error *ngIf="serviceForm.get('description')?.invalid">{{
+            getErrorMessage("description")
+          }}</mat-error>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Időtartam (perc)</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="duration"
+              min="5"
+              max="240"
+            />
+            <mat-error *ngIf="serviceForm.get('duration')?.invalid">{{
+              getErrorMessage("duration")
+            }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Ár (Ft)</mat-label>
+            <input matInput type="number" formControlName="price" min="0" />
+            <mat-error *ngIf="serviceForm.get('price')?.invalid">{{
+              getErrorMessage("price")
+            }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row status-row">
+          <mat-slide-toggle formControlName="isActive" color="primary">
+            {{ serviceForm.get("isActive")?.value ? "Aktív" : "Inaktív" }}
+          </mat-slide-toggle>
+        </div>
+
+        <div class="form-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="serviceForm.invalid || isSubmitting"
+          >
+            <mat-spinner diameter="24" *ngIf="isSubmitting"></mat-spinner>
+            <span *ngIf="!isSubmitting">{{
+              isEditMode ? "Mentés" : "Hozzáadás"
+            }}</span>
+          </button>
+          <button
+            mat-button
+            type="button"
+            (click)="resetForm()"
+            *ngIf="isEditMode"
+          >
+            Mégse
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="services-list-container">
+    <h2>Szolgáltatások listája</h2>
+
+    <div class="spinner-container" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <div class="table-container mat-elevation-z2" *ngIf="!isLoading">
+      <table mat-table [dataSource]="services" matSort class="services-table">
+        <!-- Név oszlop -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Név</th>
+          <td mat-cell *matCellDef="let service">{{ service.name }}</td>
+        </ng-container>
+
+        <!-- Leírás oszlop -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Leírás</th>
+          <td mat-cell *matCellDef="let service" class="description-cell">
+            {{ service.description }}
+          </td>
+        </ng-container>
+
+        <!-- Időtartam oszlop -->
+        <ng-container matColumnDef="duration">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Időtartam (perc)
+          </th>
+          <td mat-cell *matCellDef="let service">{{ service.duration }}</td>
+        </ng-container>
+
+        <!-- Ár oszlop -->
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Ár (Ft)</th>
+          <td mat-cell *matCellDef="let service">{{ service.price || 0 }}</td>
+        </ng-container>
+
+        <!-- Aktív oszlop -->
+        <ng-container matColumnDef="isActive">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Állapot</th>
+          <td mat-cell *matCellDef="let service">
+            <mat-slide-toggle
+              [checked]="service.isActive"
+              (change)="toggleServiceStatus(service)"
+              color="primary"
+            >
+              {{ service.isActive ? "Aktív" : "Inaktív" }}
+            </mat-slide-toggle>
+          </td>
+        </ng-container>
+
+        <!-- Műveletek oszlop -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Műveletek</th>
+          <td mat-cell *matCellDef="let service">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="editService(service)"
+              matTooltip="Szerkesztés"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteService(service.id)"
+              matTooltip="Törlés"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      <mat-paginator
+        [pageSizeOptions]="[5, 10, 25, 100]"
+        aria-label="Oldalak kiválasztása"
+      ></mat-paginator>
+    </div>
+
+    <div class="no-data-message" *ngIf="!isLoading && services.length === 0">
+      <p>
+        Még nincsenek szolgáltatások. Használja a fenti űrlapot az első
+        szolgáltatás létrehozásához.
+      </p>
+    </div>
+  </div>
+</div>

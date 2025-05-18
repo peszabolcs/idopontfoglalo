@@ -1,5 +1,5 @@
 .admin-container {
-  padding: 1.5rem;
+  padding: 1rem;
   max-width: 1200px;
   margin: 0 auto;
 
@@ -9,6 +9,19 @@
   h4 {
     margin-bottom: 1rem;
     color: #333;
+  }
+
+  .admin-toolbar {
+    margin-bottom: 20px;
+
+    .toolbar-spacer {
+      flex: 1 1 auto;
+    }
+
+    button.active {
+      background: rgba(255, 255, 255, 0.2);
+      font-weight: 500;
+    }
   }
 
   .admin-dashboard {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -11,12 +11,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Service } from '../../../models';
 import { ServiceService } from '../../../services/service.service';
 
@@ -33,15 +35,20 @@ import { ServiceService } from '../../../services/service.service';
     MatIconModule,
     MatTableModule,
     MatPaginatorModule,
+    MatSortModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatSlideToggleModule,
     MatDialogModule,
+    MatTooltipModule,
   ],
   templateUrl: './service-management.component.html',
   styleUrls: ['./service-management.component.css'],
 })
-export class ServiceManagementComponent implements OnInit {
+export class ServiceManagementComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
   serviceForm!: FormGroup;
   services: Service[] = [];
   isLoading = false;
@@ -67,6 +74,13 @@ export class ServiceManagementComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadServices();
+  }
+
+  ngAfterViewInit(): void {
+    // Inicializáljuk a táblázat rendezését és lapozóját
+    if (this.services.length > 0) {
+      this.initTableControls();
+    }
   }
 
   initForm(service?: Service): void {
@@ -97,12 +111,36 @@ export class ServiceManagementComponent implements OnInit {
       const services = await this.serviceService.getAllServices();
       this.services = services;
       this.isLoading = false;
+
+      // Ha vannak szolgáltatások, inicializáljuk a táblázat vezérlőit
+      setTimeout(() => {
+        if (this.services.length > 0) {
+          this.initTableControls();
+        }
+      });
     } catch (error) {
       console.error('Hiba a szolgáltatások betöltésekor:', error);
       this.showErrorMessage(
         'Nem sikerült betölteni a szolgáltatásokat. Kérjük, próbálja újra később!'
       );
       this.isLoading = false;
+    }
+  }
+
+  // Inicializálja a rendezést és lapozást a táblázathoz
+  private initTableControls(): void {
+    if (this.sort && this.paginator) {
+      // A táblázat adatforrásának beállítása
+      const dataSource = new MatTableDataSource<Service>(this.services);
+      dataSource.sort = this.sort;
+      dataSource.paginator = this.paginator;
+
+      // A rendezés alapértelmezetten a név oszlop szerint történik
+      this.sort.active = 'name';
+      this.sort.direction = 'asc';
+
+      // Felülírjuk a szolgáltatások tömböt a MatTableDataSource-szal
+      this.services = dataSource as any;
     }
   }
 

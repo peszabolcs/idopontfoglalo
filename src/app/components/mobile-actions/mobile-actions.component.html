@@ -1,0 +1,20 @@
+<mat-nav-list>
+  <h3 mat-subheader>Gyors műveletek</h3>
+
+  <a
+    mat-list-item
+    *ngFor="let action of actions"
+    [routerLink]="action.route"
+    (click)="openLink(action.route)"
+  >
+    <mat-icon mat-list-icon>{{ action.icon }}</mat-icon>
+    <span mat-line>{{ action.label }}</span>
+  </a>
+
+  <mat-divider></mat-divider>
+
+  <a mat-list-item (click)="bottomSheetRef.dismiss()">
+    <mat-icon mat-list-icon>close</mat-icon>
+    <span mat-line>Bezárás</span>
+  </a>
+</mat-nav-list>

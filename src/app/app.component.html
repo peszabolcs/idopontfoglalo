@@ -4,4 +4,16 @@
     <router-outlet></router-outlet>
   </main>
   <app-footer></app-footer>
+
+  <!-- Mobil gyorsnavigáció gomb, amely csak mobil nézetben jelenik meg -->
+  <button
+    *ngIf="isMobile"
+    mat-fab
+    color="primary"
+    class="mobile-action-button"
+    (click)="openMobileActions()"
+    aria-label="Műveletek"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
 </div>

@@ -19,6 +19,9 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatStepperModule } from '@angular/material/stepper';
+import { LocationService } from '../../services/location.service';
+import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
 
 @Component({
   selector: 'app-appointment-booking',
@@ -38,10 +41,23 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatStepperModule,
+  ],
+  providers: [
+    {
+      provide: STEPPER_GLOBAL_OPTIONS,
+      useValue: { showError: true },
+    },
   ],
 })
 export class AppointmentBookingComponent implements OnInit {
+  serviceFormGroup: FormGroup;
+  dateTimeFormGroup: FormGroup;
+  locationFormGroup: FormGroup;
+  detailsFormGroup: FormGroup;
   appointmentForm: FormGroup;
+  isLinear = true;
+
   services = [
     { value: 'szemelyi', viewValue: 'Személyi igazolvány' },
     { value: 'utlevel', viewValue: 'Útlevél' },
@@ -74,20 +90,41 @@ export class AppointmentBookingComponent implements OnInit {
 
   isLoading = false;
   minDate = new Date();
+  locations: any[] = [];
 
   constructor(
     private fb: FormBuilder,
     private appointmentService: AppointmentService,
     private userService: UserService,
+    private locationService: LocationService,
     private router: Router,
     private snackBar: MatSnackBar
   ) {
     // Beállítjuk a minimum dátumot holnapra
     this.minDate.setDate(this.minDate.getDate() + 1);
 
-    // Inicializáljuk az űrlapot
+    // Inicializáljuk az űrlapokat lépésenként
+    this.serviceFormGroup = this.fb.group({
+      service: ['', Validators.required],
+    });
+
+    this.locationFormGroup = this.fb.group({
+      locationId: ['', Validators.required],
+    });
+
+    this.dateTimeFormGroup = this.fb.group({
+      date: ['', Validators.required],
+      time: ['', Validators.required],
+    });
+
+    this.detailsFormGroup = this.fb.group({
+      notes: [''],
+    });
+
+    // A régi forma, amit megtartunk a kompatibilitás miatt
     this.appointmentForm = this.fb.group({
       service: ['', Validators.required],
+      locationId: ['', Validators.required],
       date: ['', Validators.required],
       time: ['', Validators.required],
       notes: [''],
@@ -101,7 +138,70 @@ export class AppointmentBookingComponent implements OnInit {
         duration: 3000,
       });
       this.router.navigate(['/bejelentkezes']);
+      return;
     }
+
+    // Betöltjük a helyszíneket
+    this.loadLocations();
+
+    // Form változások követése, hogy szinkronban legyenek az űrlapok
+    this.serviceFormGroup.get('service')?.valueChanges.subscribe((value) => {
+      this.appointmentForm.get('service')?.setValue(value);
+    });
+
+    this.locationFormGroup
+      .get('locationId')
+      ?.valueChanges.subscribe((value) => {
+        this.appointmentForm.get('locationId')?.setValue(value);
+      });
+
+    this.dateTimeFormGroup.get('date')?.valueChanges.subscribe((value) => {
+      this.appointmentForm.get('date')?.setValue(value);
+    });
+
+    this.dateTimeFormGroup.get('time')?.valueChanges.subscribe((value) => {
+      this.appointmentForm.get('time')?.setValue(value);
+    });
+
+    this.detailsFormGroup.get('notes')?.valueChanges.subscribe((value) => {
+      this.appointmentForm.get('notes')?.setValue(value);
+    });
+  }
+
+  loadLocations() {
+    this.locationService.getAllLocations().subscribe({
+      next: (locations) => {
+        this.locations = locations;
+      },
+      error: (err) => {
+        console.error('Hiba a helyszínek betöltése során:', err);
+        this.snackBar.open('Nem sikerült betölteni a helyszíneket', 'Bezár', {
+          duration: 3000,
+        });
+      },
+    });
+  }
+
+  /**
+   * Visszaadja a kiválasztott szolgáltatás megjelenítési nevét
+   */
+  getSelectedServiceViewValue(): string {
+    const selectedValue = this.serviceFormGroup.get('service')?.value;
+    const selectedService = this.services.find(
+      (service) => service.value === selectedValue
+    );
+    return selectedService ? selectedService.viewValue : '';
+  }
+
+  /**
+   * Visszaadja a kiválasztott helyszín nevét
+   */
+  getSelectedLocationName(): string {
+    const selectedId = this.locationFormGroup.get('locationId')?.value;
+    const selectedLocation = this.locations.find(
+      (location) => location.id === selectedId
+    );
+    return selectedLocation ? selectedLocation.name : '';
   }
 
   async onSubmit() {

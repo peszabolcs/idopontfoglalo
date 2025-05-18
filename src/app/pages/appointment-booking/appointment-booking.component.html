@@ -4,93 +4,203 @@
   </mat-card-header>
 
   <mat-card-content>
-    <form
-      [formGroup]="appointmentForm"
-      (ngSubmit)="onSubmit()"
-      class="appointment-form"
+    <!-- Lépésenkénti űrlap MatStepper használatával -->
+    <mat-stepper
+      [linear]="isLinear"
+      class="mat-elevation-z2 appointment-stepper"
     >
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Ügyintézési típus</mat-label>
-        <mat-select formControlName="service">
-          <mat-option *ngFor="let service of services" [value]="service.value">
-            {{ service.viewValue }}
-          </mat-option>
-        </mat-select>
-        <mat-error
-          *ngIf="
-            appointmentForm.get('service')?.invalid &&
-            appointmentForm.get('service')?.touched
-          "
-        >
-          A szolgáltatás kiválasztása kötelező
-        </mat-error>
-      </mat-form-field>
-
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Dátum</mat-label>
-          <input
-            matInput
-            [matDatepicker]="picker"
-            formControlName="date"
-            [min]="minDate"
-          />
-          <mat-datepicker-toggle
-            matIconSuffix
-            [for]="picker"
-          ></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-          <mat-error
-            *ngIf="
-              appointmentForm.get('date')?.invalid &&
-              appointmentForm.get('date')?.touched
-            "
-          >
-            A dátum megadása kötelező
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Időpont</mat-label>
-          <mat-select formControlName="time">
-            <mat-option *ngFor="let time of availableTimes" [value]="time">
-              {{ time }}
-            </mat-option>
-          </mat-select>
-          <mat-error
-            *ngIf="
-              appointmentForm.get('time')?.invalid &&
-              appointmentForm.get('time')?.touched
-            "
-          >
-            Az időpont kiválasztása kötelező
-          </mat-error>
-        </mat-form-field>
-      </div>
-
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Megjegyzés</mat-label>
-        <textarea
-          matInput
-          formControlName="notes"
-          placeholder="További megjegyzések..."
-        ></textarea>
-      </mat-form-field>
-
-      <button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        [disabled]="appointmentForm.invalid || isLoading"
-        class="submit-button"
+      <!-- 1. lépés: Szolgáltatás kiválasztása -->
+      <mat-step
+        [stepControl]="serviceFormGroup"
+        label="Szolgáltatás kiválasztása"
       >
-        <mat-spinner
-          *ngIf="isLoading"
-          diameter="24"
-          color="accent"
-        ></mat-spinner>
-        <span *ngIf="!isLoading">Időpont foglalása</span>
-      </button>
-    </form>
+        <form [formGroup]="serviceFormGroup">
+          <div class="step-content">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Ügyintézési típus</mat-label>
+              <mat-select formControlName="service">
+                <mat-option
+                  *ngFor="let service of services"
+                  [value]="service.value"
+                >
+                  {{ service.viewValue }}
+                </mat-option>
+              </mat-select>
+              <mat-error
+                *ngIf="
+                  serviceFormGroup.get('service')?.invalid &&
+                  serviceFormGroup.get('service')?.touched
+                "
+              >
+                A szolgáltatás kiválasztása kötelező
+              </mat-error>
+            </mat-form-field>
+            <div class="step-actions">
+              <button
+                mat-button
+                matStepperNext
+                [disabled]="serviceFormGroup.invalid"
+              >
+                Tovább
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- 2. lépés: Helyszín kiválasztása -->
+      <mat-step [stepControl]="locationFormGroup" label="Helyszín kiválasztása">
+        <form [formGroup]="locationFormGroup">
+          <div class="step-content">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Helyszín</mat-label>
+              <mat-select formControlName="locationId">
+                <mat-option
+                  *ngFor="let location of locations"
+                  [value]="location.id"
+                >
+                  {{ location.name }} - {{ location.address }}
+                </mat-option>
+              </mat-select>
+              <mat-error
+                *ngIf="
+                  locationFormGroup.get('locationId')?.invalid &&
+                  locationFormGroup.get('locationId')?.touched
+                "
+              >
+                A helyszín kiválasztása kötelező
+              </mat-error>
+            </mat-form-field>
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>Vissza</button>
+              <button
+                mat-button
+                matStepperNext
+                [disabled]="locationFormGroup.invalid"
+              >
+                Tovább
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- 3. lépés: Időpont kiválasztása -->
+      <mat-step [stepControl]="dateTimeFormGroup" label="Időpont kiválasztása">
+        <form [formGroup]="dateTimeFormGroup">
+          <div class="step-content">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Dátum</mat-label>
+                <input
+                  matInput
+                  [matDatepicker]="picker"
+                  formControlName="date"
+                  [min]="minDate"
+                />
+                <mat-datepicker-toggle
+                  matIconSuffix
+                  [for]="picker"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-error
+                  *ngIf="
+                    dateTimeFormGroup.get('date')?.invalid &&
+                    dateTimeFormGroup.get('date')?.touched
+                  "
+                >
+                  A dátum megadása kötelező
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Időpont</mat-label>
+                <mat-select formControlName="time">
+                  <mat-option
+                    *ngFor="let time of availableTimes"
+                    [value]="time"
+                  >
+                    {{ time }}
+                  </mat-option>
+                </mat-select>
+                <mat-error
+                  *ngIf="
+                    dateTimeFormGroup.get('time')?.invalid &&
+                    dateTimeFormGroup.get('time')?.touched
+                  "
+                >
+                  Az időpont kiválasztása kötelező
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>Vissza</button>
+              <button
+                mat-button
+                matStepperNext
+                [disabled]="dateTimeFormGroup.invalid"
+              >
+                Tovább
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- 4. lépés: További részletek és megerősítés -->
+      <mat-step [stepControl]="detailsFormGroup" label="Megerősítés">
+        <form [formGroup]="detailsFormGroup">
+          <div class="step-content">
+            <h3>Foglalás részletei</h3>
+            <div class="appointment-summary">
+              <p>
+                <strong>Szolgáltatás:</strong>
+                {{ getSelectedServiceViewValue() }}
+              </p>
+              <p>
+                <strong>Helyszín:</strong>
+                {{ getSelectedLocationName() }}
+              </p>
+              <p>
+                <strong>Dátum:</strong>
+                {{
+                  dateTimeFormGroup.get("date")?.value | date : "yyyy. MM. dd."
+                }}
+              </p>
+              <p>
+                <strong>Időpont:</strong>
+                {{ dateTimeFormGroup.get("time")?.value }}
+              </p>
+            </div>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Megjegyzés (opcionális)</mat-label>
+              <textarea
+                matInput
+                formControlName="notes"
+                placeholder="További megjegyzések..."
+              ></textarea>
+            </mat-form-field>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>Vissza</button>
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="onSubmit()"
+                [disabled]="isLoading"
+              >
+                <mat-spinner
+                  *ngIf="isLoading"
+                  diameter="24"
+                  color="accent"
+                ></mat-spinner>
+                <span *ngIf="!isLoading">Időpont foglalása</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-step>
+    </mat-stepper>
   </mat-card-content>
 </mat-card>

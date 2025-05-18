@@ -1,0 +1,33 @@
+<div class="location-search-container">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Helyszín keresése</mat-label>
+    <input
+      type="text"
+      placeholder="Kezdjen el gépelni a kereséshez..."
+      matInput
+      [formControl]="locationCtrl"
+      [matAutocomplete]="auto"
+    />
+    <mat-icon matSuffix>search</mat-icon>
+    <mat-autocomplete
+      #auto="matAutocomplete"
+      [displayWith]="displayLocation"
+      (optionSelected)="onLocationSelected($event.option.value)"
+    >
+      <mat-option
+        *ngFor="let location of filteredLocations | async"
+        [value]="location"
+      >
+        <div class="location-option">
+          <mat-icon class="location-icon">location_on</mat-icon>
+          <div class="location-details">
+            <span class="location-name">{{ location.name }}</span>
+            <span class="location-address"
+              >{{ location.city }}, {{ location.address }}</span
+            >
+          </div>
+        </div>
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+</div>
