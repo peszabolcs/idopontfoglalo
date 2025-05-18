@@ -31,6 +31,15 @@ export class AppointmentCardComponent {
   @Output() edit = new EventEmitter<string>();
   @Output() cancel = new EventEmitter<string>();
 
+  // Service típusok és a hozzájuk tartozó megjelenítési nevek
+  serviceTypes = [
+    { value: 'szemelyi', viewValue: 'Személyi igazolvány' },
+    { value: 'utlevel', viewValue: 'Útlevél' },
+    { value: 'jogositvany', viewValue: 'Jogosítvány' },
+    { value: 'lakcimkartya', viewValue: 'Lakcímkártya' },
+    { value: 'other', viewValue: 'Egyéb' },
+  ];
+
   getStatusColor(status: string): 'primary' | 'accent' | 'warn' {
     switch (status) {
       case 'pending':
@@ -44,6 +53,12 @@ export class AppointmentCardComponent {
       default:
         return 'primary';
     }
+  }
+
+  // A service ID alapján visszaadja a megjelenítési nevet
+  getServiceName(serviceId: string): string {
+    const service = this.serviceTypes.find((s) => s.value === serviceId);
+    return service ? service.viewValue : 'Egyéb';
   }
 
   isModifiable(): boolean {

@@ -146,6 +146,11 @@ export class AppointmentBookingComponent implements OnInit {
 
     // Form változások követése, hogy szinkronban legyenek az űrlapok
     this.serviceFormGroup.get('service')?.valueChanges.subscribe((value) => {
+      console.log('Service selected:', value);
+      const selectedService = this.services.find(
+        (service) => service.value === value
+      );
+      console.log('Found service object:', selectedService);
       this.appointmentForm.get('service')?.setValue(value);
     });
 
@@ -190,7 +195,7 @@ export class AppointmentBookingComponent implements OnInit {
     const selectedService = this.services.find(
       (service) => service.value === selectedValue
     );
-    return selectedService ? selectedService.viewValue : '';
+    return selectedService ? selectedService.viewValue : 'Nem választott';
   }
 
   /**
@@ -208,13 +213,45 @@ export class AppointmentBookingComponent implements OnInit {
     if (this.appointmentForm.valid) {
       try {
         this.isLoading = true;
-        const formValue = this.appointmentForm.value;
-        const date = new Date(formValue.date);
-        const formattedDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
 
-        await this.appointmentService.createAppointment({
-          ...formValue,
+        // Közvetlenül az űrlapokból olvassuk ki az értékeket, hogy elkerüljük a szinkronizációs problémákat
+        const serviceValue = this.serviceFormGroup.get('service')?.value;
+        const locationIdValue = this.locationFormGroup.get('locationId')?.value;
+        const dateValue = this.dateTimeFormGroup.get('date')?.value;
+        const timeValue = this.dateTimeFormGroup.get('time')?.value;
+        const notesValue = this.detailsFormGroup.get('notes')?.value;
+
+        // Dátum kezelése időzóna-független módon
+        // Ez a megoldás biztosítja, hogy a kiválasztott dátum pontosan legyen elmentve a szerveren
+        let formattedDate = '';
+        if (dateValue) {
+          // Ha Date objektum, akkor biztonságosan formázzuk
+          if (dateValue instanceof Date) {
+            // Nap, hónap, év kinyerése külön-külön az időzóna hatás elkerülésére
+            const year = dateValue.getFullYear();
+            const month = String(dateValue.getMonth() + 1).padStart(2, '0'); // Hónapok 0-tól indexeltek
+            const day = String(dateValue.getDate()).padStart(2, '0');
+            formattedDate = `${year}-${month}-${day}`;
+          } else {
+            // Ha már string formátumban van
+            formattedDate = dateValue;
+          }
+        }
+
+        console.log('Foglalás adatai:', {
+          service: serviceValue,
+          locationId: locationIdValue,
           date: formattedDate,
+          time: timeValue,
+        });
+
+        // Foglalás létrehozása a korrekt adatokkal
+        await this.appointmentService.createAppointment({
+          service: serviceValue,
+          locationId: locationIdValue,
+          date: formattedDate,
+          time: timeValue,
+          notes: notesValue || '',
         });
 
         this.snackBar.open('Időpont sikeresen foglalva!', 'Bezár', {

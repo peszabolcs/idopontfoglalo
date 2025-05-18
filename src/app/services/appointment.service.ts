@@ -18,6 +18,7 @@ export class AppointmentService {
     service: string;
     date: string;
     time: string;
+    locationId?: string;
     notes?: string;
   }): Promise<string | number> {
     try {
@@ -31,7 +32,7 @@ export class AppointmentService {
       const newAppointment: Omit<Appointment, 'id'> = {
         userId: currentUser.id,
         serviceId: appointmentData.service, // Az űrlapból származó service érték
-        locationId: 'budapest1', // Alapértelmezett helyszín, később dinamikusan lehet kezelni
+        locationId: appointmentData.locationId || 'budapest1', // Használjuk a megadott helyszínt, vagy az alapértelmezettet
         date: appointmentData.date,
         time: appointmentData.time,
         status: 'pending',

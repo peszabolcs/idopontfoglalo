@@ -24,6 +24,7 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
   isLoading = true;
   currentUserId: string | null = null;
   private userSubscription?: Subscription;
+  private appointmentsSubscription?: Subscription;
 
   constructor(
     private appointmentService: AppointmentService,
@@ -50,6 +51,9 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
     }
+    if (this.appointmentsSubscription) {
+      this.appointmentsSubscription.unsubscribe();
+    }
   }
 
   loadAppointments(): void {
@@ -60,24 +64,31 @@ export class MyAppointmentsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Használjuk a Firebase service-t az időpontok lekéréséhez
-    this.firebaseService
-      .getAppointmentsByUser(this.currentUserId)
-      .then((appointments: Appointment[]) => {
-        this.allAppointments = appointments;
-        this.filterAppointments();
-        this.isLoading = false;
-      })
-      .catch((error: any) => {
-        console.error('Error loading appointments:', error);
-        this.snackBar.open(
-          'Hiba történt az időpontok betöltése során',
-          'Bezár',
-          {
-            duration: 3000,
-          }
-        );
-        this.isLoading = false;
+    // Valós idejű frissítéseket használunk a Firebase-ből
+    if (this.appointmentsSubscription) {
+      this.appointmentsSubscription.unsubscribe();
+    }
+
+    this.appointmentsSubscription = this.firebaseService
+      .getUserAppointmentsRealtime(this.currentUserId)
+      .subscribe({
+        next: (appointments: Appointment[]) => {
+          console.log('Új foglalások betöltve:', appointments.length);
+          this.allAppointments = appointments;
+          this.filterAppointments();
+          this.isLoading = false;
+        },
+        error: (error: any) => {
+          console.error('Error loading appointments:', error);
+          this.snackBar.open(
+            'Hiba történt az időpontok betöltése során',
+            'Bezár',
+            {
+              duration: 3000,
+            }
+          );
+          this.isLoading = false;
+        },
       });
   }
 

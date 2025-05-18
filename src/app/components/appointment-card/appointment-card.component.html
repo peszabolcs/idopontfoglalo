@@ -1,7 +1,7 @@
 <mat-card class="appointment-card">
   <mat-card-header>
     <mat-card-title>
-      {{ appointment.serviceId || "Időpontfoglalás" }}
+      {{ getServiceName(appointment.serviceId) || "Időpontfoglalás" }}
     </mat-card-title>
     <mat-card-subtitle>
       {{ appointment.date | dateFormat }} {{ appointment.time | timeFormat }}

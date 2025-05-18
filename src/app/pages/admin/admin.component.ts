@@ -1,6 +1,7 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   AfterViewInit,
   ViewChild,
   ElementRef,
@@ -23,6 +24,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { AdminAppointmentEditDialogComponent } from './admin-appointment-edit-dialog/admin-appointment-edit-dialog.component';
 import { RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin',
@@ -41,7 +43,7 @@ import { RouterModule } from '@angular/router';
     RouterModule,
   ],
 })
-export class AdminComponent implements OnInit, AfterViewInit {
+export class AdminComponent implements OnInit, AfterViewInit, OnDestroy {
   // Adattárolók az adminisztrációs feladatokhoz
   activeAppointments: Appointment[] = [];
   pastAppointments: Appointment[] = [];
@@ -62,6 +64,9 @@ export class AdminComponent implements OnInit, AfterViewInit {
   // Aktív nézet kezelése
   activeView: string = 'today';
 
+  // Valós idejű frissítések
+  private appointmentsSubscription?: Subscription;
+
   @ViewChild('statsContainer', { static: false }) statsContainer?: ElementRef;
 
   constructor(
@@ -76,7 +81,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     this.loadAllServices();
     this.loadAllLocations();
     this.loadAllUsers();
-    this.loadTodaysAppointments();
+    this.setupAppointmentsListener();
     this.loadAppointmentStatistics();
   }
 
@@ -105,6 +110,19 @@ export class AdminComponent implements OnInit, AfterViewInit {
         }
       }, 0);
     }
+  }
+
+  ngOnDestroy(): void {
+    // Feliratkozások megszüntetése
+    if (this.appointmentsSubscription) {
+      this.appointmentsSubscription.unsubscribe();
+    }
+  }
+
+  // Valós idejű adatfrissítés beállítása
+  setupAppointmentsListener(): void {
+    // Az aktuális nézetnek megfelelően állítjuk be a figyelőt
+    this.loadTodaysAppointments();
   }
 
   // Összes szolgáltatás betöltése
@@ -168,14 +186,79 @@ export class AdminComponent implements OnInit, AfterViewInit {
   loadTodaysAppointments(): void {
     const today = new Date().toISOString().split('T')[0];
 
+    // Leiratkozunk a korábbi figyelőről, ha van
+    if (this.appointmentsSubscription) {
+      this.appointmentsSubscription.unsubscribe();
+    }
+
+    // Valós idejű frissítéseket használunk
     this.firebaseService
       .getAppointmentsByDateRange(today, today)
       .then((appointments) => {
         this.todaysAppointments = appointments;
+        console.log('Mai foglalások betöltve:', appointments.length);
+
+        // Most már figyelőt állítunk be a kollekció változásaira
+        this.setupAllAppointmentsListener();
       })
       .catch((error) => {
         console.error('Hiba a mai foglalások lekérdezésekor:', error);
       });
+  }
+
+  // Beállítjuk a valós idejű figyelést az összes időpontra
+  setupAllAppointmentsListener(): void {
+    // Használjunk valós idejű frissítést az összes időpontra
+    this.appointmentsSubscription = this.firebaseService
+      .getAllAppointmentsRealtime()
+      .subscribe({
+        next: (appointments) => {
+          console.log('Minden foglalás frissítve:', appointments.length);
+
+          // Az aktív nézetnek megfelelően szűrjük az adatokat
+          this.filterAppointmentsByView(appointments);
+        },
+        error: (error) => {
+          console.error('Hiba az időpontok valós idejű figyelésében:', error);
+        },
+      });
+  }
+
+  // Szűrjük az időpontokat az aktív nézet alapján
+  filterAppointmentsByView(appointments: Appointment[]): void {
+    const today = new Date().toISOString().split('T')[0];
+
+    if (this.activeView === 'today') {
+      // Mai foglalások szűrése
+      this.todaysAppointments = appointments.filter(
+        (app) => app.date === today
+      );
+    } else if (this.activeView === 'active') {
+      // Aktív foglalások (mai vagy jövőbeli, nem lemondott/befejezett)
+      this.activeAppointments = appointments.filter(
+        (app) =>
+          app.date >= today &&
+          (app.status === 'pending' || app.status === 'confirmed')
+      );
+    } else if (this.activeView === 'past') {
+      // Múltbeli foglalások
+      const pastMonth = new Date(new Date().setDate(new Date().getDate() - 30))
+        .toISOString()
+        .split('T')[0];
+
+      this.pastAppointments = appointments.filter(
+        (app) =>
+          (app.date < today ||
+            app.status === 'completed' ||
+            app.status === 'cancelled') &&
+          app.date >= pastMonth
+      );
+    } else if (this.activeView === 'dateRange') {
+      // Dátum intervallum szerinti szűrés
+      this.activeAppointments = appointments.filter(
+        (app) => app.date >= this.startDate && app.date <= this.endDate
+      );
+    }
   }
 
   // Aktív foglalások lekérdezése

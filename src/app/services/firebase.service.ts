@@ -968,6 +968,35 @@ export class FirebaseService {
   }
 
   /**
+   * Valós idejű frissítések az összes időpontra (admin számára)
+   * @returns Observable, mely az összes időpontot tartalmazza
+   */
+  getAllAppointmentsRealtime(): Observable<Appointment[]> {
+    return new Observable<Appointment[]>((observer) => {
+      const appointmentsRef = collection(this.firestore, 'appointments');
+
+      // onSnapshot figyeli a változásokat és automatikusan küld frissítéseket
+      const unsubscribe = onSnapshot(
+        appointmentsRef,
+        (snapshot) => {
+          const appointments = snapshot.docs.map((doc) => {
+            const data = doc.data() as Omit<Appointment, 'id'>;
+            return { id: doc.id, ...data } as Appointment;
+          });
+          observer.next(appointments);
+        },
+        (error) => {
+          console.error('Error getting realtime appointments:', error);
+          observer.error(error);
+        }
+      );
+
+      // Ha leiratkoznak az Observable-ről, leállítjuk a Firestore figyelést is
+      return () => unsubscribe();
+    });
+  }
+
+  /**
    * Tranzakcióban kezelt időpontfoglalás
    * Biztosítja, hogy ne lehessen dupla foglalás, akkor sem ha egyszerre érkezik több kérés
    * @param appointmentData Az időpont adatai
