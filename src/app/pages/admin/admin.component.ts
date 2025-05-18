@@ -1,11 +1,164 @@
-import { Component } from "@angular/core"
+import { Component, OnInit } from '@angular/core';
+import { FirebaseService } from '../../services/firebase.service';
+import { Appointment, Service, Location } from '../../models';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: "app-admin",
-  templateUrl: "./admin.component.html",
-  styleUrls: ["./admin.component.scss"],
+  selector: 'app-admin',
+  templateUrl: './admin.component.html',
+  styleUrls: ['./admin.component.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
 })
-export class AdminComponent {
-  // Admin komponens
-}
+export class AdminComponent implements OnInit {
+  // Adattárolók az adminisztrációs feladatokhoz
+  activeAppointments: Appointment[] = [];
+  pastAppointments: Appointment[] = [];
+  todaysAppointments: Appointment[] = [];
+  appointmentStatistics: any = null;
 
+  // Dátum intervallum kereséshez
+  startDate: string = new Date().toISOString().split('T')[0]; // Mai dátum
+  endDate: string = new Date(new Date().setDate(new Date().getDate() + 30))
+    .toISOString()
+    .split('T')[0]; // 30 nappal később
+
+  // Aktív nézet kezelése
+  activeView: string = 'today';
+
+  constructor(private firebaseService: FirebaseService) {}
+
+  ngOnInit(): void {
+    // Kezdeti adatok betöltése
+    this.loadTodaysAppointments();
+    this.loadAppointmentStatistics();
+  }
+
+  // Segédmetódus objektum kulcsainak lekéréséhez a template-ben
+  getObjectKeys(obj: any): string[] {
+    return Object.keys(obj);
+  }
+
+  // Mai napi foglalások lekérdezése
+  loadTodaysAppointments(): void {
+    const today = new Date().toISOString().split('T')[0];
+
+    this.firebaseService
+      .getAppointmentsByDateRange(today, today)
+      .then((appointments) => {
+        this.todaysAppointments = appointments;
+      })
+      .catch((error) => {
+        console.error('Hiba a mai foglalások lekérdezésekor:', error);
+      });
+  }
+
+  // Aktív foglalások lekérdezése
+  loadActiveAppointments(): void {
+    const today = new Date().toISOString().split('T')[0];
+
+    this.firebaseService
+      .getAppointmentsWithMultipleFilters({
+        startDate: today,
+        status: 'pending' as
+          | 'pending'
+          | 'confirmed'
+          | 'cancelled'
+          | 'completed',
+      })
+      .then((appointments) => {
+        this.activeAppointments = appointments;
+        this.activeView = 'active';
+      })
+      .catch((error) => {
+        console.error('Hiba az aktív foglalások lekérdezésekor:', error);
+      });
+  }
+
+  // Korábbi foglalások lekérdezése
+  loadPastAppointments(): void {
+    const today = new Date().toISOString().split('T')[0];
+    const pastMonth = new Date(new Date().setDate(new Date().getDate() - 30))
+      .toISOString()
+      .split('T')[0];
+
+    this.firebaseService
+      .getAppointmentsByDateRange(pastMonth, today)
+      .then((appointments) => {
+        // Csak a befejezett vagy lemondott foglalásokat jelenítjük meg
+        this.pastAppointments = appointments.filter(
+          (app) => app.status === 'completed' || app.status === 'cancelled'
+        );
+        this.activeView = 'past';
+      })
+      .catch((error) => {
+        console.error('Hiba a korábbi foglalások lekérdezésekor:', error);
+      });
+  }
+
+  // Foglalások keresése dátum intervallum alapján
+  searchAppointmentsByDateRange(): void {
+    this.firebaseService
+      .getAppointmentsByDateRange(this.startDate, this.endDate)
+      .then((appointments) => {
+        this.activeAppointments = appointments;
+        this.activeView = 'dateRange';
+      })
+      .catch((error) => {
+        console.error('Hiba az időintervallum lekérdezésekor:', error);
+      });
+  }
+
+  // Statisztikák lekérdezése
+  loadAppointmentStatistics(): void {
+    this.firebaseService
+      .getAppointmentStatistics('month')
+      .then((stats) => {
+        this.appointmentStatistics = stats;
+      })
+      .catch((error) => {
+        console.error('Hiba a statisztikák lekérdezésekor:', error);
+      });
+  }
+
+  // Foglalás állapotának frissítése
+  updateAppointmentStatus(
+    appointmentId: string,
+    newStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed'
+  ): void {
+    this.firebaseService
+      .updateAppointmentStatus(appointmentId, newStatus)
+      .then(() => {
+        // Frissítsük az aktív nézetet
+        if (this.activeView === 'today') {
+          this.loadTodaysAppointments();
+        } else if (this.activeView === 'active') {
+          this.loadActiveAppointments();
+        } else if (this.activeView === 'past') {
+          this.loadPastAppointments();
+        } else if (this.activeView === 'dateRange') {
+          this.searchAppointmentsByDateRange();
+        }
+
+        // Frissítsük a statisztikákat
+        this.loadAppointmentStatistics();
+      })
+      .catch((error) => {
+        console.error('Hiba a foglalás állapotának frissítésekor:', error);
+      });
+  }
+
+  // Nézet váltás kezelése
+  setActiveView(viewName: string): void {
+    this.activeView = viewName;
+
+    if (viewName === 'today') {
+      this.loadTodaysAppointments();
+    } else if (viewName === 'active') {
+      this.loadActiveAppointments();
+    } else if (viewName === 'past') {
+      this.loadPastAppointments();
+    }
+  }
+}

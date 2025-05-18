@@ -2,56 +2,371 @@
   <h1>Admin felület</h1>
   <p>Üdvözöljük az adminisztrációs felületen!</p>
 
-  <div class="admin-section">
-    <h2>Legutóbbi foglalások</h2>
-    <div class="table-responsive">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Név</th>
-            <th>Időpont</th>
-            <th>Helyszín</th>
-            <th>Ügyintézés típusa</th>
-            <th>Állapot</th>
-            <th>Műveletek</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Kovács János</td>
-            <td>2023.11.15 10:30</td>
-            <td>Budapest - Központi</td>
-            <td>Személyi igazolvány</td>
-            <td><span class="status active">Aktív</span></td>
-            <td>
-              <button class="btn btn-sm btn-secondary">Szerkesztés</button>
-              <button class="btn btn-sm btn-danger">Törlés</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Nagy Éva</td>
-            <td>2023.11.16 14:15</td>
-            <td>Debrecen</td>
-            <td>Útlevél</td>
-            <td><span class="status active">Aktív</span></td>
-            <td>
-              <button class="btn btn-sm btn-secondary">Szerkesztés</button>
-              <button class="btn btn-sm btn-danger">Törlés</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Szabó Péter</td>
-            <td>2023.11.14 09:00</td>
-            <td>Szeged</td>
-            <td>Jogosítvány</td>
-            <td><span class="status completed">Teljesítve</span></td>
-            <td>
-              <button class="btn btn-sm btn-secondary">Szerkesztés</button>
-              <button class="btn btn-sm btn-danger">Törlés</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <!-- Navigációs sáv a különböző nézetek között -->
+  <div class="admin-navigation">
+    <div class="nav-buttons">
+      <button
+        class="btn btn-primary"
+        [class.active]="activeView === 'today'"
+        (click)="loadTodaysAppointments(); activeView = 'today'"
+      >
+        Mai foglalások
+      </button>
+      <button
+        class="btn btn-primary"
+        [class.active]="activeView === 'active'"
+        (click)="loadActiveAppointments()"
+      >
+        Aktív foglalások
+      </button>
+      <button
+        class="btn btn-primary"
+        [class.active]="activeView === 'past'"
+        (click)="loadPastAppointments()"
+      >
+        Korábbi foglalások
+      </button>
+      <button
+        class="btn btn-primary"
+        [class.active]="activeView === 'statistics'"
+        (click)="loadAppointmentStatistics(); activeView = 'statistics'"
+      >
+        Statisztikák
+      </button>
+    </div>
+  </div>
+
+  <!-- Dátum intervallum keresés -->
+  <div class="date-range-search mt-3">
+    <h3>Foglalások keresése időszak szerint</h3>
+    <div class="input-group">
+      <span class="input-group-text">Kezdő dátum:</span>
+      <input type="date" class="form-control" [(ngModel)]="startDate" />
+      <span class="input-group-text">Befejező dátum:</span>
+      <input type="date" class="form-control" [(ngModel)]="endDate" />
+      <button class="btn btn-primary" (click)="searchAppointmentsByDateRange()">
+        Keresés
+      </button>
+    </div>
+  </div>
+
+  <!-- Eredmények megjelenítése -->
+  <div class="result-container mt-4">
+    <!-- Mai foglalások -->
+    <div class="admin-section" *ngIf="activeView === 'today'">
+      <h2>Mai foglalások</h2>
+      <div class="alert alert-info" *ngIf="todaysAppointments.length === 0">
+        Nincs mai foglalás.
+      </div>
+      <div class="table-responsive" *ngIf="todaysAppointments.length > 0">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Azonosító</th>
+              <th>Felhasználó</th>
+              <th>Időpont</th>
+              <th>Helyszín</th>
+              <th>Szolgáltatás</th>
+              <th>Állapot</th>
+              <th>Műveletek</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let appointment of todaysAppointments">
+              <td>{{ appointment.id }}</td>
+              <td>{{ appointment.userId }}</td>
+              <td>{{ appointment.date }} {{ appointment.time }}</td>
+              <td>{{ appointment.locationId }}</td>
+              <td>{{ appointment.serviceId }}</td>
+              <td>
+                <span class="status" [ngClass]="appointment.status">{{
+                  appointment.status
+                }}</span>
+              </td>
+              <td class="actions">
+                <button
+                  class="btn btn-sm btn-success"
+                  *ngIf="appointment.status === 'pending'"
+                  (click)="
+                    updateAppointmentStatus(appointment.id!, 'confirmed')
+                  "
+                >
+                  Jóváhagyás
+                </button>
+                <button
+                  class="btn btn-sm btn-info"
+                  *ngIf="appointment.status === 'confirmed'"
+                  (click)="
+                    updateAppointmentStatus(appointment.id!, 'completed')
+                  "
+                >
+                  Teljesítés
+                </button>
+                <button
+                  class="btn btn-sm btn-danger"
+                  *ngIf="
+                    appointment.status === 'pending' ||
+                    appointment.status === 'confirmed'
+                  "
+                  (click)="
+                    updateAppointmentStatus(appointment.id!, 'cancelled')
+                  "
+                >
+                  Lemondás
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Aktív foglalások -->
+    <div class="admin-section" *ngIf="activeView === 'active'">
+      <h2>Aktív foglalások</h2>
+      <div class="alert alert-info" *ngIf="activeAppointments.length === 0">
+        Nincs aktív foglalás.
+      </div>
+      <div class="table-responsive" *ngIf="activeAppointments.length > 0">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Azonosító</th>
+              <th>Felhasználó</th>
+              <th>Időpont</th>
+              <th>Helyszín</th>
+              <th>Szolgáltatás</th>
+              <th>Állapot</th>
+              <th>Műveletek</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let appointment of activeAppointments">
+              <td>{{ appointment.id }}</td>
+              <td>{{ appointment.userId }}</td>
+              <td>{{ appointment.date }} {{ appointment.time }}</td>
+              <td>{{ appointment.locationId }}</td>
+              <td>{{ appointment.serviceId }}</td>
+              <td>
+                <span class="status" [ngClass]="appointment.status">{{
+                  appointment.status
+                }}</span>
+              </td>
+              <td class="actions">
+                <button
+                  class="btn btn-sm btn-success"
+                  *ngIf="appointment.status === 'pending'"
+                  (click)="
+                    updateAppointmentStatus(appointment.id!, 'confirmed')
+                  "
+                >
+                  Jóváhagyás
+                </button>
+                <button
+                  class="btn btn-sm btn-info"
+                  *ngIf="appointment.status === 'confirmed'"
+                  (click)="
+                    updateAppointmentStatus(appointment.id!, 'completed')
+                  "
+                >
+                  Teljesítés
+                </button>
+                <button
+                  class="btn btn-sm btn-danger"
+                  *ngIf="
+                    appointment.status === 'pending' ||
+                    appointment.status === 'confirmed'
+                  "
+                  (click)="
+                    updateAppointmentStatus(appointment.id!, 'cancelled')
+                  "
+                >
+                  Lemondás
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Korábbi foglalások -->
+    <div class="admin-section" *ngIf="activeView === 'past'">
+      <h2>Korábbi foglalások</h2>
+      <div class="alert alert-info" *ngIf="pastAppointments.length === 0">
+        Nincs korábbi foglalás.
+      </div>
+      <div class="table-responsive" *ngIf="pastAppointments.length > 0">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Azonosító</th>
+              <th>Felhasználó</th>
+              <th>Időpont</th>
+              <th>Helyszín</th>
+              <th>Szolgáltatás</th>
+              <th>Állapot</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let appointment of pastAppointments">
+              <td>{{ appointment.id }}</td>
+              <td>{{ appointment.userId }}</td>
+              <td>{{ appointment.date }} {{ appointment.time }}</td>
+              <td>{{ appointment.locationId }}</td>
+              <td>{{ appointment.serviceId }}</td>
+              <td>
+                <span class="status" [ngClass]="appointment.status">{{
+                  appointment.status
+                }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Dátum szerinti foglalások -->
+    <div class="admin-section" *ngIf="activeView === 'dateRange'">
+      <h2>Foglalások a kiválasztott időszakban</h2>
+      <p>Időszak: {{ startDate }} - {{ endDate }}</p>
+      <div class="alert alert-info" *ngIf="activeAppointments.length === 0">
+        Nincs foglalás a megadott időszakban.
+      </div>
+      <div class="table-responsive" *ngIf="activeAppointments.length > 0">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Azonosító</th>
+              <th>Felhasználó</th>
+              <th>Időpont</th>
+              <th>Helyszín</th>
+              <th>Szolgáltatás</th>
+              <th>Állapot</th>
+              <th>Műveletek</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let appointment of activeAppointments">
+              <td>{{ appointment.id }}</td>
+              <td>{{ appointment.userId }}</td>
+              <td>{{ appointment.date }} {{ appointment.time }}</td>
+              <td>{{ appointment.locationId }}</td>
+              <td>{{ appointment.serviceId }}</td>
+              <td>
+                <span class="status" [ngClass]="appointment.status">{{
+                  appointment.status
+                }}</span>
+              </td>
+              <td class="actions">
+                <button
+                  class="btn btn-sm btn-success"
+                  *ngIf="appointment.status === 'pending'"
+                  (click)="
+                    updateAppointmentStatus(appointment.id!, 'confirmed')
+                  "
+                >
+                  Jóváhagyás
+                </button>
+                <button
+                  class="btn btn-sm btn-info"
+                  *ngIf="appointment.status === 'confirmed'"
+                  (click)="
+                    updateAppointmentStatus(appointment.id!, 'completed')
+                  "
+                >
+                  Teljesítés
+                </button>
+                <button
+                  class="btn btn-sm btn-danger"
+                  *ngIf="
+                    appointment.status === 'pending' ||
+                    appointment.status === 'confirmed'
+                  "
+                  (click)="
+                    updateAppointmentStatus(appointment.id!, 'cancelled')
+                  "
+                >
+                  Lemondás
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Statisztikák -->
+    <div class="admin-section" *ngIf="activeView === 'statistics'">
+      <h2>Időpont statisztikák</h2>
+      <div class="alert alert-info" *ngIf="!appointmentStatistics">
+        Statisztikák betöltése folyamatban...
+      </div>
+      <div class="stats-container" *ngIf="appointmentStatistics">
+        <div class="stats-card">
+          <h4>Összesítés (elmúlt 30 nap)</h4>
+          <ul class="stats-list">
+            <li>
+              Összes foglalás:
+              <strong>{{ appointmentStatistics.total || 0 }}</strong>
+            </li>
+            <li>
+              Függőben:
+              <strong>{{ appointmentStatistics.pending || 0 }}</strong>
+            </li>
+            <li>
+              Megerősítve:
+              <strong>{{ appointmentStatistics.confirmed || 0 }}</strong>
+            </li>
+            <li>
+              Lemondva:
+              <strong>{{ appointmentStatistics.cancelled || 0 }}</strong>
+            </li>
+            <li>
+              Teljesítve:
+              <strong>{{ appointmentStatistics.completed || 0 }}</strong>
+            </li>
+          </ul>
+        </div>
+
+        <div
+          class="stats-card"
+          *ngIf="
+            appointmentStatistics.byService &&
+            getObjectKeys(appointmentStatistics.byService).length > 0
+          "
+        >
+          <h4>Szolgáltatások szerint</h4>
+          <ul class="stats-list">
+            <li
+              *ngFor="let key of getObjectKeys(appointmentStatistics.byService)"
+            >
+              {{ key }}:
+              <strong>{{ appointmentStatistics.byService[key] }}</strong>
+            </li>
+          </ul>
+        </div>
+
+        <div
+          class="stats-card"
+          *ngIf="
+            appointmentStatistics.byLocation &&
+            getObjectKeys(appointmentStatistics.byLocation).length > 0
+          "
+        >
+          <h4>Helyszínek szerint</h4>
+          <ul class="stats-list">
+            <li
+              *ngFor="
+                let key of getObjectKeys(appointmentStatistics.byLocation)
+              "
+            >
+              {{ key }}:
+              <strong>{{ appointmentStatistics.byLocation[key] }}</strong>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </div>

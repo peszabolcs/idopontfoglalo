@@ -65,11 +65,23 @@ export class LoginComponent {
         const user = await this.userService.login(email, password);
 
         if (user) {
-          this.snackBar.open('Sikeres bejelentkezés!', 'Bezár', {
-            duration: 3000,
-            horizontalPosition: 'center',
-            verticalPosition: 'top',
-          });
+          console.log('Bejelentkezett felhasználó:', user);
+          console.log(
+            'Admin jogosultság:',
+            user.isAdmin === true ? 'IGEN' : 'NEM'
+          );
+
+          this.snackBar.open(
+            `Sikeres bejelentkezés! Admin jogosultság: ${
+              user.isAdmin === true ? 'IGEN' : 'NEM'
+            }`,
+            'Bezár',
+            {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+            }
+          );
           this.router.navigate(['/']);
         } else {
           this.snackBar.open('Hibás email cím vagy jelszó!', 'Bezár', {
